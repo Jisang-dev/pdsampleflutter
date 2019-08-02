@@ -12,6 +12,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:pdsample/init.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 enum FormMode { LOGIN, SIGNUP }
 
@@ -69,9 +70,9 @@ class MyApp extends StatelessWidget {
 // "hot reload" (press "r" in the console where you ran "flutter run",
 // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
 // counter didn't reset back to zero; the application is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.green,
       ),
-      home: new MyHomePage(title: '주차부 버스 주차용 페이지',),
+      home: new MyHomePage(title: '주차부 버스 인솔자용',),
     );
   }
 }
@@ -121,17 +122,19 @@ class _MyHomePageState extends State<MyHomePage> {
 // fast, so that you can just rebuild anything that needs updating rather
 // than having to individually change instances of widgets.
     return new Scaffold(
-      appBar: new AppBar(
-// Here we take the value from the MyHomePage object that was created by
-// the App.build method, and use it to set our appbar title.
-        title: new Text(widget.title),
-      ),
-      body: Stack(
-        children: <Widget>[
-          _showBody(),
-          _showCircularProgress(),
-        ],
-      ),
+        body: Container(
+          alignment: Alignment.center,
+          padding: EdgeInsets.all(20.0),
+          decoration: BoxDecoration(
+            image: DecorationImage(image: AssetImage("assets/jwmain.png"), fit: BoxFit.cover),
+          ),
+          child: Stack(
+            children: <Widget>[
+              _showBody(),
+              _showCircularProgress(),
+            ],
+          ),
+        )
     );
   }
 
@@ -143,25 +146,61 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget _showBody() {
-    return new Container(
-      padding: EdgeInsets.all(16.0),
-      child: new Form(
-        key: _formKey,
-        child: new ListView(
-          shrinkWrap: true,
-          children: <Widget>[
-            _showEmailInput(),
-            _showPasswordInput(),
-            _submit(),
-          ],
+    return new Center(
+      child: Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          backgroundBlendMode: BlendMode.softLight,
+          color: Colors.white,
+        ),
+        child: Form(
+          key: _formKey,
+          child: new ListView(
+            shrinkWrap: false,
+            children: <Widget>[
+              _showImage(),
+              Padding(padding: const EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),),
+              Text("SIC2019 주차지원", textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.green[900], fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+              _showEmailInput(),
+              _showPasswordInput(),
+              _submit(),
+              Row(
+                  children: <Widget>[
+                    Expanded(
+                        child: Divider(height: 36, color: Colors.black,)
+                    ),
+                    Text("  또는  "),
+                    Expanded(
+                        child: Divider(height: 36, color: Colors.black,)
+                    ),
+                  ]
+              ),
+              _seeAbove(),
+              FlatButton(
+                onPressed: () {print("Hello world");},
+                child: Text("개인정보취급방침", style: TextStyle(color: Colors.blue),),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
+  Widget _showImage() {
+    return Image.asset(
+      'assets/jw2019.png',
+      width: 120,
+      height: 56.875,
+    );
+  }
+
   Widget _showEmailInput() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0),
+      padding: const EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
       child: new TextFormField(
         maxLines: 1,
         keyboardType: TextInputType.emailAddress,
@@ -169,8 +208,8 @@ class _MyHomePageState extends State<MyHomePage> {
         decoration: new InputDecoration(
             hintText: 'ID',
             icon: new Icon(
-              Icons.mail,
-              color: Colors.grey,
+              Icons.account_box,
+              color: Colors.green[900],
             )),
         validator: (value) => value.isEmpty ? 'ID can\'t be empty' : null,
         onSaved: (value) => _email = value,
@@ -190,7 +229,7 @@ class _MyHomePageState extends State<MyHomePage> {
             hintText: 'Password',
             icon: new Icon(
               Icons.lock,
-              color: Colors.grey,
+              color: Colors.green[900],
             )),
         validator: (value) => value.isEmpty ? 'Password can\'t be empty' : null,
         onSaved: (value) => _password = value,
@@ -200,16 +239,27 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _submit() {
     return new Padding(
-        padding: EdgeInsets.fromLTRB(0.0, 45.0, 0.0, 0.0),
-        child: new MaterialButton(
-          elevation: 5.0,
-          minWidth: 200.0,
-          height: 42.0,
-          color: Colors.blue,
-          child: new Text('Login',
-              style: new TextStyle(fontSize: 20.0, color: Colors.white)),
+        padding: EdgeInsets.fromLTRB(0.0, 30.0, 0.0, 0.0),
+        child: RaisedButton(
+          color: Colors.green[900],
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           onPressed: _validateAndSubmit,
-        ));
+          child: new Text('자동 로그인',
+              style: new TextStyle(fontSize: 20.0, color: Colors.white)),
+        ),
+        );
+  }
+  Widget _seeAbove() {
+    return new Padding(
+      padding: EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
+      child: RaisedButton(
+        color: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        onPressed: () {print("Hello world");},
+        child: new Text('둘러보기',
+            style: new TextStyle(fontSize: 20.0, color: Colors.green[900])),
+      ),
+    );
   }
 
   void _validateAndSubmit() async {
@@ -243,6 +293,9 @@ class _MyHomePageState extends State<MyHomePage> {
         });
       });
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> alert(String message) async {

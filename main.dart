@@ -13,6 +13,7 @@ import 'dart:convert';
 import 'package:pdsample/init.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:url_launcher/url_launcher.dart';
 
 enum FormMode { LOGIN, SIGNUP }
 
@@ -70,7 +71,7 @@ class MyApp extends StatelessWidget {
 // "hot reload" (press "r" in the console where you ran "flutter run",
 // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
 // counter didn't reset back to zero; the application is not restarted.
-        primarySwatch: Colors.green,
+        primaryColor: Colors.green[900]
       ),
       home: new MyHomePage(title: '주차부 버스 인솔자용',),
     );
@@ -180,7 +181,32 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               _seeAbove(),
               FlatButton(
-                onPressed: () {print("Hello world");},
+                onPressed: () async {
+                  String url;
+                  if (Platform.isAndroid) {
+                    url = "https://blog.naver.com/hyla981020/221505617243";
+                    if (await canLaunch(url)) {
+                      await launch(
+                        url,
+                        forceSafariVC: true,
+                        forceWebView: true,
+                        enableJavaScript: true,
+                      );
+                    }
+                  } else {
+                    url = "https://blog.naver.com/hyla981020/221505617243";
+                    try {
+                      await launch(
+                        url,
+                        forceSafariVC: true,
+                        forceWebView: true,
+                        enableJavaScript: true,
+                      );
+                    } catch (e) {
+                      print(e.toString());
+                    }
+                  }
+                },
                 child: Text("개인정보취급방침", style: TextStyle(color: Colors.blue),),
               ),
             ],

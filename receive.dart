@@ -15,8 +15,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' show utf8, json;
 
 int timestamp;
+String commit;
 
 class ReceiveApp extends StatefulWidget {
+  ReceiveApp(String com) {
+    commit = com;
+  }
+
   @override
   _MyAppState createState() => new _MyAppState();
 }
@@ -34,6 +39,9 @@ class _MyAppState extends State<ReceiveApp> {
   bool confirm2 = false;
   bool confirm3 = false;
   bool confirm4 = false;
+
+  Timeline _timeline = Timeline.afternoon;
+  String _commitDate = commit;
 
   Location location;
 
@@ -158,42 +166,6 @@ class _MyAppState extends State<ReceiveApp> {
     });
   }
 
-  Future<void> sendLocation() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("모드를 변경하시겠습니까?"),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('아니오'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            FlatButton(
-              child: Text('네'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                changeMode();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void changeMode() async {
-    Navigator.pushReplacement(
-      context,
-      new MaterialPageRoute(
-          builder: (BuildContext context) => new SendApp()
-      ),
-    );
-  }
-
   void logout() async {
     await prefs.setString('id', null);
     await prefs.setString('pw', null);
@@ -254,41 +226,18 @@ class _MyAppState extends State<ReceiveApp> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return new MaterialApp(
+        title: '오후 화면',
+        theme: ThemeData(
+        primaryColor: Colors.green[900],
+        bottomAppBarColor: Colors.grey[300],
+    ),
+    home: Scaffold(
       appBar: new AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: new Text("테스트용 (오후)"),
+        title: new Text("2019SIC 주차 지원", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20,),),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.map),
-            onPressed: () async {
-              String url;
-              if (Platform.isAndroid) {
-                url = "https://jisang-dev.github.io/hyla981020/terminal.html";
-                if (await canLaunch(url)) {
-                  await launch(
-                    url,
-                    forceSafariVC: true,
-                    forceWebView: true,
-                    enableJavaScript: true,
-                  );
-                }
-              } else {
-                url = "https://jisang-dev.github.io/hyla981020/terminal.html";
-                try {
-                  await launch(
-                      url,
-                      forceSafariVC: true,
-                      forceWebView: true,
-                      enableJavaScript: true,
-                  );
-                } catch (e) {
-                    print(e.toString());
-                  }
-                }
-              },
-          ),
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: () {
@@ -315,82 +264,309 @@ class _MyAppState extends State<ReceiveApp> {
                 // Important: Remove any padding from the ListView.
                 padding: EdgeInsets.zero,
                 children: <Widget>[
-                  DrawerHeader(
-                    child:  ListView(
-                      // Important: Remove any padding from the ListView.
-                        padding: EdgeInsets.zero,
-                        children: <Widget>[
-                          Text(snapshot.data['bus_info']['bus_name'], style: TextStyle(fontSize: 20),),
-                          Padding(
-                              padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
-                              child: new MaterialButton(
-                                elevation: 5.0,
-                                minWidth: 200.0,
-                                height: 42.0,
-                                color: Colors.blue,
-                                child:new Text("정보 수정"),
-                                onPressed: () async {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    new MaterialPageRoute(
-                                        builder: (BuildContext context) => new InitApp()
-                                    ),
-                                  );
-                                },
-                              )
-                          ),
-                          Padding(
-                              padding: EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
-                              child: new MaterialButton(
-                                elevation: 5.0,
-                                minWidth: 200.0,
-                                height: 42.0,
-                                color: Colors.blue,
-                                child:new Text('로그아웃'),
-                                onPressed: logout,
-                              )
-                          ),
-                        ]
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
+                  Container(
+                    height: 90.0,
+                    child: DrawerHeader(
+                      child:  Text("2019SIC 주차 지원", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),),
+                      decoration: BoxDecoration(
+                        color: Colors.green[900],
+                      ),
                     ),
                   ),
                   ListTile(
-                    title: Text('인솔자 이름: ' + snapshot.data['bus_info']['bus_guide_name']),
-                    onTap: () {
-                      // Update the state of the app
-                      // ...
-                      // Then close the drawer
-                      Navigator.pop(context);
-                    },
+                    title: Text('내 정보', style: TextStyle(fontWeight: FontWeight.bold),),
+                    leading: Icon(Icons.account_box),
+                  ),
+                  Container(
+                    color: Colors.grey[100],
+                    padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                    child: Text(snapshot.data['bus_info']['bus_name'] + "\n" + "버스 n대 중 1호차" + "\n" + snapshot.data['bus_info']['bus_guide_name'] + "\n" + snapshot.data['bus_info']['bus_guide_phone']),
+                  ),
+                  Container(
+                    color: Colors.grey[300],
+                    padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                    child: Text("첫째날(금요일) - 제1관터미널" + "\n" + "둘째날(토요일) - 제2관터미널" + "\n" + "셋째날(일요일) - 제1관터미널"),
                   ),
                   ListTile(
-                    title: Text('차량번호: ' + snapshot.data['bus_info']['bus_number']),
-                    onTap: () {
-                      // Update the state of the app
-                      // ...
-                      // Then close the drawer
-                      Navigator.pop(context);
-                    },
+                    title: Text('주차장', style: TextStyle(fontWeight: FontWeight.bold),),
+                    leading: Icon(Icons.flag),
+                  ),
+                  Container(
+                    color: Colors.grey[100],
+                    padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () async {
+                            String url;
+                            if (Platform.isAndroid) {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              if (await canLaunch(url)) {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              }
+                            } else {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              try {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              } catch (e) {
+                                print(e.toString());
+                              }
+                            }
+                          },
+                          child: Text("제1관 터미널", style: TextStyle(color: Colors.blue),),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            String url;
+                            if (Platform.isAndroid) {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              if (await canLaunch(url)) {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              }
+                            } else {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              try {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              } catch (e) {
+                                print(e.toString());
+                              }
+                            }
+                          },
+                          child: Text("제1관 주차장 내부", style: TextStyle(color: Colors.blue),),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            String url;
+                            if (Platform.isAndroid) {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              if (await canLaunch(url)) {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              }
+                            } else {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              try {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              } catch (e) {
+                                print(e.toString());
+                              }
+                            }
+                          },
+                          child: Text("제2관 터미널", style: TextStyle(color: Colors.blue),),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            String url;
+                            if (Platform.isAndroid) {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              if (await canLaunch(url)) {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              }
+                            } else {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              try {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              } catch (e) {
+                                print(e.toString());
+                              }
+                            }
+                          },
+                          child: Text("외부", style: TextStyle(color: Colors.blue),),
+                        ),
+                      ],
+                    ),
                   ),
                   ListTile(
-                    title: Text('버스기사 HP: ' + snapshot.data['bus_info']['bus_driver_phone']),
-                    onTap: () {
-                      // Update the state of the app
-                      // ...
-                      // Then close the drawer
-                      Navigator.pop(context);
-                    },
+                    title: Text('앱 사용법', style: TextStyle(fontWeight: FontWeight.bold),),
+                    leading: Icon(Icons.announcement),
+                  ),
+                  Container(
+                    color: Colors.grey[100],
+                    padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () async {
+                            String url;
+                            if (Platform.isAndroid) {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              if (await canLaunch(url)) {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              }
+                            } else {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              try {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              } catch (e) {
+                                print(e.toString());
+                              }
+                            }
+                          },
+                          child: Text("대회장으로", style: TextStyle(color: Colors.blue),),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            String url;
+                            if (Platform.isAndroid) {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              if (await canLaunch(url)) {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              }
+                            } else {
+                              url = "https://jisang-dev.github.io/hyla981020/terminal.html";
+                              try {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              } catch (e) {
+                                print(e.toString());
+                              }
+                            }
+                          },
+                          child: Text("집으로", style: TextStyle(color: Colors.blue),),
+                        ),
+                      ],
+                    ),
                   ),
                   ListTile(
-                    title: Text('권장 터미널: ' + (snapshot.data['bus_info']['bus_park_target'] != null? snapshot.data['bus_info']['bus_park_target'] : "구현 안 됨")),
-                    onTap: () {
-                      // Update the state of the app
-                      // ...
-                      // Then close the drawer
-                      Navigator.pop(context);
-                    },
+                    title: Text('참고', style: TextStyle(fontWeight: FontWeight.bold),),
+                    leading: Icon(Icons.insert_drive_file),
+                  ),
+                  Container(
+                    color: Colors.grey[100],
+                    padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () async {
+                            String url;
+                            if (Platform.isAndroid) {
+                              url = "https://jw2019.org";
+                              if (await canLaunch(url)) {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              }
+                            } else {
+                              url = "https://jw2019.org";
+                              try {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              } catch (e) {
+                                print(e.toString());
+                              }
+                            }
+                          },
+                          child: Text("jw2019.org", style: TextStyle(color: Colors.blue),),
+                        ),
+                        GestureDetector(
+                          onTap: () async {
+                            String url;
+                            if (Platform.isAndroid) {
+                              url = "https://blog.naver.com/hyla981020/221505617243";
+                              if (await canLaunch(url)) {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              }
+                            } else {
+                              url = "https://blog.naver.com/hyla981020/221505617243";
+                              try {
+                                await launch(
+                                  url,
+                                  forceSafariVC: true,
+                                  forceWebView: true,
+                                  enableJavaScript: true,
+                                );
+                              } catch (e) {
+                                print(e.toString());
+                              }
+                            }
+                          },
+                          child: Text("개인정보취급방침", style: TextStyle(color: Colors.blue),),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
+                    child: RaisedButton(
+                      color: Colors.green[900],
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      onPressed: logout,
+                      child: new Text('로그아웃',
+                          style: new TextStyle(fontSize: 20.0, color: Colors.white)),
+                    ),
                   ),
                 ],
               );
@@ -399,82 +575,17 @@ class _MyAppState extends State<ReceiveApp> {
                 // Important: Remove any padding from the ListView.
                 padding: EdgeInsets.zero,
                 children: <Widget>[
-                  DrawerHeader(
-                    child:  ListView(
-                      // Important: Remove any padding from the ListView.
-                        padding: EdgeInsets.zero,
-                        children: <Widget>[
-                          Text('', style: TextStyle(fontSize: 20),),
-                          Padding(
-                              padding: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
-                              child: new MaterialButton(
-                                elevation: 5.0,
-                                minWidth: 200.0,
-                                height: 42.0,
-                                color: Colors.blue,
-                                child:new Text("정보 수정"),
-                                onPressed: () async {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    new MaterialPageRoute(
-                                        builder: (BuildContext context) => new InitApp()
-                                    ),
-                                  );
-                                },
-                              )
-                          ),
-                          Padding(
-                              padding: EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
-                              child: new MaterialButton(
-                                elevation: 5.0,
-                                minWidth: 200.0,
-                                height: 42.0,
-                                color: Colors.blue,
-                                child:new Text('로그아웃'),
-                                onPressed: logout,
-                              )
-                          ),
-                        ]
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
+                  Container(
+                    height: 90.0,
+                    child: DrawerHeader(
+                      child:  Text("2019SIC 주차 지원", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20,),),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                      ),
                     ),
                   ),
                   ListTile(
-                    title: Text('인솔자 이름: '),
-                    onTap: () {
-                      // Update the state of the app
-                      // ...
-                      // Then close the drawer
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text('차량번호: '),
-                    onTap: () {
-                      // Update the state of the app
-                      // ...
-                      // Then close the drawer
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text('버스기사 HP: '),
-                    onTap: () {
-                      // Update the state of the app
-                      // ...
-                      // Then close the drawer
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    title: Text('권장 터미널: '),
-                    onTap: () {
-                      // Update the state of the app
-                      // ...
-                      // Then close the drawer
-                      Navigator.pop(context);
-                    },
+                    title: Text("로딩중입니다..."),
                   ),
                 ],
               );
@@ -482,6 +593,7 @@ class _MyAppState extends State<ReceiveApp> {
           },
         ),
       ),
+    )
     );
   }
 
@@ -497,6 +609,7 @@ class _MyAppState extends State<ReceiveApp> {
       child: new ListView(
         shrinkWrap: true,
         children: <Widget>[
+          Text(_commitDate + " 오후", style: TextStyle(fontSize: 14),),
           depart(),
           departDetail(),
           arrive(),
@@ -505,25 +618,10 @@ class _MyAppState extends State<ReceiveApp> {
           terminalArriveDetail(),
           terminalDepart(),
           terminalDepartDetail(),
-          _submit(),
           finish(),
         ],
       ),
     );
-  }
-
-  Widget _submit() { // for AndroidOS
-    return new Padding(
-        padding: EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),
-        child: new MaterialButton(
-          elevation: 5.0,
-          minWidth: 200.0,
-          height: 42.0,
-          color: Colors.blue,
-          child:new Text('모드 변경',
-              style: new TextStyle(fontSize: 20.0, color: Colors.white)),
-          onPressed: sendLocation,
-        ));
   }
 
   Widget depart() {

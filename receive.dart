@@ -1537,7 +1537,7 @@ class EditB extends State<EditBus> {
         keyboardType: TextInputType.text,
         autofocus: false,
         decoration: new InputDecoration(
-          labelText: '차량 번호 (예: 12가 3456)',
+          labelText: '버스 차량 번호 (예: 12가 3456)',
         ),
         validator: (value) => value.isEmpty ? '값을 입력하세요.' : null,
         onSaved: (value) => _busCode = value,
@@ -1569,7 +1569,7 @@ class EditB extends State<EditBus> {
         color: Colors.green[900],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         onPressed: () {
-          confirm(/*"인솔자 이름:"+ controller1.text + "\n\n" + "인솔자 전화번호:"+ controller2.text + "\n\n" +  */"차량 번호:"+ controller3.text + "\n\n" + "기사 연락처:"+ controller4.text +  "\n\n" + "위 정보가 맞습니까?");
+          confirm(/*"인솔자 이름:"+ controller1.text + "\n\n" + "인솔자 전화번호:"+ controller2.text + "\n\n" +  */"버스 차량 번호:"+ controller3.text + "\n\n" + "기사 연락처:"+ controller4.text +  "\n\n" + "위 정보가 맞습니까?");
         },
         child: new Text('확인',
             style: new TextStyle(fontSize: 20.0, color: Colors.white)),

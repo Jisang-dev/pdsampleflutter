@@ -950,7 +950,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
         dense: true,
         leading: Icon(Icons.looks_one, color: !confirm1 ? Colors.red : Colors.green,),
         title: Text("출발", style: TextStyle(fontSize: 20),),
-        subtitle: Text("버스가 출발하였을 때 자동으로 켜집니다. \nGPS가 켜져있는지도 확인해주세요.",),
+        subtitle: Text("버스가 출발하였을 때 누릅니다. \nGPS가 켜져있는지도 확인해주세요.",),
         onTap: () {
           !confirm1 ? alert("버스가 출발하였습니까?", 1) : alert("버스가 출발하지 않았습니까?", 6);
         },
@@ -1210,7 +1210,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                     break;
                   case 6:
                     if (!confirm2) {
-                      status(prefs.getString("token"), "start").then((post) { /// status: 'ready'
+                      status(prefs.getString("token"), "dReady").then((post) {
                         if (post.ok) {
                           setState(() {
                             confirm1 = false;
@@ -1738,7 +1738,7 @@ class EditB extends State<EditBus> {
         keyboardType: TextInputType.text,
         autofocus: false,
         decoration: new InputDecoration(
-          labelText: '차량 번호 (예: 12가 3456)',
+          labelText: '버스 차량 번호 (예: 12가 3456)',
         ),
         validator: (value) => value.isEmpty ? '값을 입력하세요.' : null,
         onSaved: (value) => _busCode = value,
@@ -1770,7 +1770,7 @@ class EditB extends State<EditBus> {
         color: Colors.green[900],
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         onPressed: () {
-          confirm(/*"인솔자 이름:"+ controller1.text + "\n\n" + "인솔자 전화번호:"+ controller2.text + "\n\n" +  */"차량 번호:"+ controller3.text + "\n\n" + "기사 연락처:"+ controller4.text +  "\n\n" + "위 정보가 맞습니까?");
+          confirm(/*"인솔자 이름:"+ controller1.text + "\n\n" + "인솔자 전화번호:"+ controller2.text + "\n\n" +  */"버스 차량 번호:"+ controller3.text + "\n\n" + "기사 연락처:"+ controller4.text +  "\n\n" + "위 정보가 맞습니까?");
         },
         child: new Text('확인',
             style: new TextStyle(fontSize: 20.0, color: Colors.white)),

@@ -682,7 +682,7 @@ class _MyAppState extends State<InitPage> {
     if (form.validate()) {
       form.save();
 
-      await fetchPost(prefs.getString('token'), _guideName, _guideNumber, _busCode, _busNumber, _timeline == Timeline.morning ? "start" : "request").then((post) async {
+      await fetchPost(prefs.getString('token'), _guideName, _guideNumber, _busCode, _busNumber, _timeline == Timeline.morning ? "dReady" : "request").then((post) async {
         if (post.ok) {
           if (_timeline == Timeline.morning) {
             Navigator.pushReplacement(

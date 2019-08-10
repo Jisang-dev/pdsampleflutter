@@ -11,6 +11,7 @@ import 'package:pdsample/receive.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:pdsample/change.dart';
+import 'package:package_info/package_info.dart';
 
 class Post {
   final bool ok;
@@ -40,6 +41,17 @@ class Init {
       reason : json['reason'],
     );
   }
+}
+
+Future<Map<String, dynamic>> version() async {
+  final response = await http.get (
+    "https://ip2019.tk/guide/version",
+    headers: {
+      "content-type" : "application/json",
+      "accept" : "application/json",
+    },
+  );
+  return json.decode(utf8.decode(response.bodyBytes));
 }
 
 class InitApp extends StatelessWidget {
@@ -87,6 +99,7 @@ class _MyAppState extends State<InitPage> {
 
   SharedPreferences prefs;
   Map<String, dynamic> info;
+  PackageInfo packageInfo;
 
   Timeline _timeline = (new DateTime.now().hour < 12) ? Timeline.morning : Timeline.afternoon;
   String _commitDate = DateTime.now().day % 3 == 1 ? '첫째날(금) 09-13': (DateTime.now().day % 3 == 2 ? '둘째날(토) 09-14': '셋째날(일) 09-15');
@@ -99,6 +112,14 @@ class _MyAppState extends State<InitPage> {
 
   void currentUser() async {
     prefs = await SharedPreferences.getInstance();
+    packageInfo = await PackageInfo.fromPlatform();
+
+    await version().then((data) async {
+      if (data != null && data['reason'] > int.parse(packageInfo.buildNumber)) { // 최근 앱 버전 확인
+        alertMessage();
+      }
+    });
+
     await _user().then((data) {
       if (data != null && data['ok']) {
         setState(() {
@@ -508,6 +529,46 @@ class _MyAppState extends State<InitPage> {
       return Center(child: CircularProgressIndicator());
     }
     return Container(height: 0.0, width: 0.0,);
+  }
+
+  Future<void> alertMessage() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("어플리케이션 업데이트가 필요합니다."),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('네'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                String url;
+                if (Platform.isAndroid) {
+                  url = "https://play.google.com/store/apps/details?id=com.hyla981020.pdsample";
+                  if (await canLaunch(url)) {
+                    await launch(
+                      url,
+                      enableJavaScript: true,
+                    );
+                  }
+                } else {
+                  url = "https://testflight.apple.com/join/4TrWy4Vt";
+                  try {
+                    await launch(
+                      url,
+                      enableJavaScript: true,
+                    );
+                  } catch (e) {
+                    print(e.toString());
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _showBody() {

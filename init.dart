@@ -116,8 +116,11 @@ class _MyAppState extends State<InitPage> {
 
     await version().then((data) async {
       if (data != null && data['reason'] > int.parse(packageInfo.buildNumber)) { // 최근 앱 버전 확인
+        print(data['reason']);
         alertMessage();
       }
+    }).catchError((e) {
+      print(e.toString());
     });
 
     await _user().then((data) {
@@ -566,6 +569,16 @@ class _MyAppState extends State<InitPage> {
                 ),
               ),
               Text("접근 권한 오류", textAlign: TextAlign.center,),
+              Container(
+                padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
+                child: RaisedButton(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  onPressed: currentUser,
+                  child: new Text('새로고침',
+                      style: new TextStyle(fontSize: 20.0, color: Colors.green[900])),
+                ),
+              ),
               Container(
                 padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
                 child: RaisedButton(

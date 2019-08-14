@@ -1,9 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:location/location.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pdsample/store.dart';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:pdsample/main.dart';
@@ -13,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pdsample/init.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show utf8, json;
+import 'package:pdsample/map.dart';
 
 String commit;
 
@@ -64,14 +62,11 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
   bool confirm1 = false;
   bool confirm2 = false;
   bool confirm3 = false;
-  bool confirm4 = false;
 
   AnimationController _animationController;
 
   Timeline _timeline = Timeline.afternoon;
   String _commitDate = commit;
-
-  Location location;
 
   SharedPreferences prefs;
 
@@ -93,21 +88,13 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
         setState(() {
           info = data['bus_info'];
         });
-        await Firestore.instance.collection('01').document(_email).get().then((data) { /// firebase에서 call 정보 확인 (서버 통합 시 없어질 함수)
-          final cell = Cell.fromSnapshot(data);
-          confirm2 = cell.access;
-          if (confirm2) {
-            setState(() {
-              confirm2 = confirm1 = true;
-            });
-          }
-        });
+        // 터미널 도착할 경우
         if (info['bus_step'] == Step.RETURN_END || info['bus_step'] == Step.RETURN_RIDE) {
-          confirm1 = confirm2 = confirm3 = confirm4 = true;
-        } else if (info['bus_step'] == Step.RETURN_TERMINAL) {
           confirm1 = confirm2 = confirm3 = true;
-        } else if (info['bus_step'] == Step.RETURN_CALL) { /// firebase에서 python 자체 서버로 꼭 끄집어내기
+        } else if (info['bus_step'] == Step.RETURN_TERMINAL) {
           confirm1 = confirm2 = true;
+        } else if (info['bus_step'] == Step.RETURN_CALL) {
+          confirm1 = true;
         } else if (info['bus_step'] == Step.RETURN_READY) {
           print('confirm1');
           confirm1 = true;
@@ -127,41 +114,14 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
       onMessage: (Map<String, dynamic> message) async {
         print('on message $message');
         await alertMessage();
-        await Firestore.instance.collection('01').document(_email).get().then((data) {
-          final cell = Cell.fromSnapshot(data);
-          confirm2 = cell.access;
-          if (confirm2) {
-            setState(() {
-              confirm2 = confirm1 = true;
-            });
-          }
-        });
         currentUser();
       },
       onResume: (Map<String, dynamic> message) async {
         print('on resume $message');
-        await Firestore.instance.collection('01').document(_email).get().then((data) {
-          final cell = Cell.fromSnapshot(data);
-          confirm2 = cell.access;
-          if (confirm2) {
-            setState(() {
-              confirm2 = confirm1 = true;
-            });
-          }
-        });
         currentUser();
       },
       onLaunch: (Map<String, dynamic> message) async {
         print('on launch $message');
-        await Firestore.instance.collection('01').document(_email).get().then((data) {
-          final cell = Cell.fromSnapshot(data);
-          confirm2 = cell.access;
-          if (confirm2) {
-            setState(() {
-              confirm2 = confirm1 = true;
-            });
-          }
-        });
         currentUser();
       },
     );
@@ -186,13 +146,6 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
         }
       }).catchError((e) {
         print(e.toString());
-      });
-      Firestore.instance.collection('01').document(_email).get().then((data) {
-        final cell = Cell.fromSnapshot(data);
-        Firestore.instance.runTransaction((transaction) async {
-          await transaction
-              .update(cell.reference, {'token': token});
-        });
       });
     });
   }
@@ -688,6 +641,16 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
             Container(
               padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
               child: RaisedButton(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                onPressed: currentUser,
+                child: new Text('새로고침',
+                    style: new TextStyle(fontSize: 20.0, color: Colors.green[900])),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
+              child: RaisedButton(
                 color: Colors.green[900],
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 onPressed: logout,
@@ -723,6 +686,7 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
               alignment: Alignment.centerRight,
               child: ButtonTheme(
                 minWidth: 10.0,
+                height: 1,
                 child: RaisedButton(
                   padding: EdgeInsets.zero,
                   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -755,6 +719,7 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                   alignment: Alignment.centerRight,
                   child: ButtonTheme(
                     minWidth: 10.0,
+                    height: 1,
                     child: RaisedButton(
                       padding: EdgeInsets.zero,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -789,6 +754,7 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                   alignment: Alignment.centerRight,
                   child: ButtonTheme(
                     minWidth: 10.0,
+                    height: 1,
                     child: RaisedButton(
                       padding: EdgeInsets.zero,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -846,13 +812,6 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
           ) : Container(
             child: Icon(Icons.arrow_downward, color: !confirm3 ?  Colors.red[900] : Colors.green[900],),
           ),
-          terminalArrive(),
-          (confirm3 && !confirm4) ? FadeTransition(
-            opacity: _animationController,
-            child: Icon(Icons.arrow_downward, color:  Colors.yellow[900],),
-          ) : Container(
-            child: Icon(Icons.arrow_downward, color: !confirm4 ?  Colors.red[900] : Colors.green[900],),
-          ),
           terminalDepart(),
           finish(),
           Text("\n\n주차 안내부 : 010-5613-1935\n\n", textAlign: TextAlign.center, style: TextStyle(color: Colors.grey),),
@@ -870,11 +829,11 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
         child: ListTile(
           dense: true,
           leading: Icon(Icons.looks_one, color: !confirm1 ? Colors.red : Colors.green,),
-          title: Text("준비 완료, 출발 요청", style: TextStyle(fontSize: 20),),
+          title: Text("승차 준비 완료", style: TextStyle(fontSize: 20),),
           subtitle: Text("버스 승객이 모두 모였을 경우 누릅니다.",),
           onTap: () {
             setState(() {
-              !confirm1 ? alert("버스 출발을 요청하시겠습니까?", 1) : alert("버스 출발 요청을 취소하겠습니까?", 6);
+              !confirm1 ? alert("승차 준비가 완료되어, 버스 출발을 요청하시겠습니까?", 1) : alert("버스 출발 요청을 취소하겠습니까?", 6);
             });
           },
         ),
@@ -886,34 +845,37 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
     return Container(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Container(
-        color: !confirm2 ? Colors.grey[100] : Colors.orange[200],
+        color: !confirm2 ? Colors.grey[100] : Colors.red[300],
         child: ListTile(
           dense: true,
           leading: Icon(Icons.looks_two, color: !confirm2 ? Colors.red : Colors.green,),
-          title: Text("요청 승인", style: TextStyle(fontSize: 20),),
-          subtitle: Text("주차부에서 요청을 승인할 때 자동으로 켜집니다.",),
+          trailing: Container(
+            child: ButtonTheme(
+              minWidth: 10.0,
+              height: 1,
+              child: RaisedButton(
+                padding: EdgeInsets.zero,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                color: Colors.blue,
+                onPressed: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Maps(title: "1터미널",)), /// 터미널에 따라 지도 모양 다르게
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: Text("확인", style: TextStyle(fontSize: 10.0, color: Colors.white,),),
+                ),
+              ),
+            ),
+          ),
+          title: Text("위치 확인", style: TextStyle(fontSize: 20),),
+          subtitle: Text("버스가 도착하면 색상이 바뀝니다. 그때 오른쪽 버튼을 눌러 위치를 확인해주세요.",),
           onTap: () {
             setState(() {
-              !confirm2 ? alert("주차부에서 터미널 접근을 승인하지 않았습니다. 새로고침을 눌러 다시 확인해주세요.", 4) : alert("터미널 접근이 승인되었습니다.", 9);
+              !confirm2 ? alert("버스가 아직 도착하지 않았습니다. 새로고침을 눌러 다시 확인해주세요. (확인을 누르면 강제로 진행됩니다)", 3) : alert("버스가 도착하였습니다. 위치를 확인해주세요. (확인을 누르면 강제로 진행됩니다)", 8);
             });
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget terminalArrive() {
-    return Container(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-      child: Container(
-        color: !confirm3 ? Colors.grey[100] : Colors.orange[200],
-        child: ListTile(
-          dense: true,
-          leading: Icon(Icons.looks_3, color: !confirm3 ? Colors.red : Colors.green,),
-          title: Text("터미널도착, 위치 확인", style: TextStyle(fontSize: 20),),
-          subtitle: Text("터미널에 버스가 도착할 때 자동으로 켜집니다. 버스의 상세위치도 확인 가능합니다.",),
-          onTap: () {
-            !confirm3 ? alert("버스가 터미널에 정차하였습니까?", 2) : alert("버스가 아직 터미널에 정차하지 않았습니까?", 7);
           },
         ),
       ),
@@ -924,14 +886,14 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
     return Container(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Container(
-        color: !confirm4 ? Colors.grey[100] : Colors.orange[200],
+        color: !confirm3 ? Colors.grey[100] : Colors.orange[200],
         child: ListTile(
           dense: true,
-          leading: Icon(Icons.looks_4, color: !confirm4 ? Colors.red : Colors.green,),
-          title: Text("터미널출발", style: TextStyle(fontSize: 20),),
-          subtitle: Text("킨텍스를 성공적으로 떠났을 경우 누릅니다.",),
+          leading: Icon(Icons.looks_3, color: !confirm3 ? Colors.red : Colors.green,),
+          title: Text("승차 완료, 출발 (앱종료)", style: TextStyle(fontSize: 20),),
+          subtitle: Text("모두 승차하고, 버스가 터미널(주차장)을 떠날 때 누릅니다.",),
           onTap: () {
-            !confirm4 ? alert("버스 승객이 모두 승차하였고, 버스가 터미널을 빠져나왔습니까?", 3) : alert("버스가 아직 터미널을 출발하지 않았습니까?", 8);
+            !confirm3 ? alert("버스에 승객이 모두 승차하였고, 터미널을 빠져나왔습니까?", 2) : alert("버스에 승객이 승차하지 않았습니까? 또는 아직 터미널을 빠져나오지 않았습니까?", 7);
           },
         ),
       ),
@@ -940,7 +902,7 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
 
   Widget finish() {
     return ListTile(
-      title: confirm4 ? Text("수고하셨습니다!", style: TextStyle(fontSize: 14), textAlign: TextAlign.center,) : null,
+      title: confirm3 ? Text("수고하셨습니다!", style: TextStyle(fontSize: 14), textAlign: TextAlign.center,) : null,
     );
   }
 
@@ -991,6 +953,26 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("성공적으로 처리되었습니다."),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('네'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> network() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("네트워크 오류"),
           actions: <Widget>[
             FlatButton(
               child: Text('네'),
@@ -1055,7 +1037,18 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                           _isLoading = false;
                         });
                         success();
+                      } else {
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       }
+                    }).catchError((e) {
+                      print(e.toString());
+                      setState(() {
+                        _isLoading = false;
+                      });
+                      network();
                     });
                     setState(() {
                       _isLoading = false;
@@ -1063,14 +1056,25 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                     break;
                   case 2:
                     if (confirm2) {
-                      status(prefs.getString("token"), "rTerminal").then((post) {
+                      status(prefs.getString("token"), "rEnd").then((post) {
                         if (post.ok) {
                           setState(() {
                             confirm3 = true;
                             _isLoading = false;
                           });
                           success();
+                        } else {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          network();
                         }
+                      }).catchError((e) {
+                        print(e.toString());
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       });
                     } else {
                       confirm();
@@ -1078,17 +1082,31 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                         _isLoading = false;
                       });
                     }
+                    setState(() {
+                      _isLoading = false;
+                    });
                     break;
                   case 3:
-                    if (confirm3) {
-                      status(prefs.getString("token"), "rEnd").then((post) {
+                    if (confirm1) {
+                      status(prefs.getString("token"), "rTerminal").then((post) {
                         if (post.ok) {
                           setState(() {
-                            confirm4 = true;
+                            confirm2 = true;
                             _isLoading = false;
                           });
                           success();
+                        } else {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          network();
                         }
+                      }).catchError((e) {
+                        print(e.toString());
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       });
                     } else {
                       confirm();
@@ -1096,6 +1114,9 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                         _isLoading = false;
                       });
                     }
+                    setState(() {
+                      _isLoading = false;
+                    });
                     break;
                   case 6:
                     if (!confirm2) {
@@ -1106,25 +1127,18 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                             _isLoading = false;
                           });
                           success();
-                        }
-                      });
-                    } else {
-                      confirm02();
-                      setState(() {
-                        _isLoading = false;
-                      });
-                    }
-                    break;
-                  case 7:
-                    if (!confirm4) {
-                      status(prefs.getString("token"), "ready").then((post) {
-                        if (post.ok) {
+                        } else {
                           setState(() {
-                            confirm3 = false;
                             _isLoading = false;
                           });
-                          success();
+                          network();
                         }
+                      }).catchError((e) {
+                        print(e.toString());
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       });
                     } else {
                       confirm02();
@@ -1132,16 +1146,65 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                         _isLoading = false;
                       });
                     }
+                    setState(() {
+                      _isLoading = false;
+                    });
                     break;
-                  case 8:
+                  case 7:
                     status(prefs.getString("token"), "rTerminal").then((post) {
                       if (post.ok) {
                         setState(() {
-                          confirm4 = false;
+                          confirm3 = false;
                           _isLoading = false;
                         });
                         success();
+                      } else {
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       }
+                    }).catchError((e) {
+                      print(e.toString());
+                      setState(() {
+                        _isLoading = false;
+                      });
+                      network();
+                    });
+                    setState(() {
+                      _isLoading = false;
+                    });
+                    break;
+                  case 8:
+                    if (!confirm3) {
+                      status(prefs.getString("token"), "ready").then((post) {
+                        if (post.ok) {
+                          setState(() {
+                            confirm2 = false;
+                            _isLoading = false;
+                          });
+                          success();
+                        } else {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          network();
+                        }
+                      }).catchError((e) {
+                        print(e.toString());
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
+                      });
+                    } else {
+                      confirm();
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    }
+                    setState(() {
+                      _isLoading = false;
                     });
                     break;
                   default:

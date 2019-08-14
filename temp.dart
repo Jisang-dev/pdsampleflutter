@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
-import 'dart:io';
 import 'dart:convert';
 import 'package:pdsample/init.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:pdsample/main.dart';
 
   Future<Post> fetchPost(String token, String pw) async {
   final response = await http.post (

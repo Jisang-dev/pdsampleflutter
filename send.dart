@@ -2,8 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:pdsample/store.dart';
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:pdsample/main.dart';
@@ -71,8 +69,6 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
   bool confirm1 = false;
   bool confirm2 = false;
   bool confirm3 = false;
-  bool confirm4 = false;
-  bool confirm5 = false;
 
   AnimationController _animationController;
 
@@ -105,12 +101,8 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
         });
 
         if (info['bus_step'] == Step.DEPARTURE_END) {
-          confirm1 = confirm2 = confirm3 = confirm4 = confirm5 = true;
-        } else if (info['bus_step'] == Step.DEPARTURE_TERMINAL) {
-          confirm1 = confirm2 = confirm3 = confirm4 = true;
-        } else if (info['bus_step'] == Step.DEPARTURE_CP_2) {
           confirm1 = confirm2 = confirm3 = true;
-        } else if (info['bus_step'] == Step.DEPARTURE_CP_1) {
+        } else if (info['bus_step'] == Step.DEPARTURE_TERMINAL) {
           confirm1 = confirm2 = true;
         } else if (info['bus_step'] == Step.DEPARTURE_START) {
           confirm1 = true;
@@ -126,7 +118,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
     _animationController.repeat();
     super.initState();
     currentUser();
-    timestamp = (Platform.isAndroid ? Timestamp.fromDate(DateTime.now()).millisecondsSinceEpoch : Timestamp.fromDate(DateTime.now()).seconds);
+    timestamp = (Platform.isAndroid ? DateTime.now().millisecondsSinceEpoch : DateTime.now().millisecondsSinceEpoch / 1000);
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
@@ -164,14 +156,6 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
         }
       }).catchError((e) {
         print(e.toString());
-      });
-      print(token);
-      Firestore.instance.collection('01').document(_email).get().then((data) {
-        final cell = Cell.fromSnapshot(data);
-        Firestore.instance.runTransaction((transaction) async {
-          await transaction
-              .update(cell.reference, {'token': token});
-        });
       });
     });
   }
@@ -244,7 +228,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
     await prefs.setString('pw', null);
     await prefs.setString('token', null);
     if (Platform.isAndroid) {
-      streamListen.cancel();
+      if (streamListen != null) { streamListen.cancel(); }
       location = null;
     }
     Navigator.pushReplacement(
@@ -286,7 +270,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
           }
         }
         if (_count > 150) {
-          streamListen.cancel();
+          if (streamListen != null) { streamListen.cancel(); }
           location = null;
           try {
             await platform.invokeMethod('stop');
@@ -755,6 +739,16 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
             Container(
               padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
               child: RaisedButton(
+                color: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                onPressed: currentUser,
+                child: new Text('새로고침',
+                    style: new TextStyle(fontSize: 20.0, color: Colors.green[900])),
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
+              child: RaisedButton(
                 color: Colors.green[900],
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                 onPressed: logout,
@@ -790,6 +784,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                   alignment: Alignment.centerRight,
                   child: ButtonTheme(
                     minWidth: 10.0,
+                    height: 1,
                     child: RaisedButton(
                       padding: EdgeInsets.zero,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -822,6 +817,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                   alignment: Alignment.centerRight,
                   child: ButtonTheme(
                     minWidth: 10.0,
+                    height: 1,
                     child: RaisedButton(
                       padding: EdgeInsets.zero,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -856,6 +852,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                   alignment: Alignment.centerRight,
                   child: ButtonTheme(
                     minWidth: 10.0,
+                    height: 1,
                     child: RaisedButton(
                       padding: EdgeInsets.zero,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -908,6 +905,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                   alignment: Alignment.centerRight,
                   child: ButtonTheme(
                     minWidth: 10.0,
+                    height: 1,
                     child: RaisedButton(
                       padding: EdgeInsets.zero,
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -958,26 +956,12 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
           ) : Container(
             child: Icon(Icons.arrow_downward, color: !confirm2 ?  Colors.red[900] : Colors.green[900],),
           ),
-          middle(),
+          terminalArrive(),
           (confirm2 && !confirm3) ? FadeTransition(
             opacity: _animationController,
             child: Icon(Icons.arrow_downward, color:  Colors.yellow[900],),
           ) : Container(
             child: Icon(Icons.arrow_downward, color: !confirm3 ?  Colors.red[900] : Colors.green[900],),
-          ),
-          arrive(),
-          (confirm3 && !confirm4) ? FadeTransition(
-            opacity: _animationController,
-            child: Icon(Icons.arrow_downward, color:  Colors.yellow[900],),
-          ) : Container(
-            child: Icon(Icons.arrow_downward, color: !confirm4 ?  Colors.red[900] : Colors.green[900],),
-          ),
-          terminalArrive(),
-          (confirm4 && !confirm5) ? FadeTransition(
-            opacity: _animationController,
-            child: Icon(Icons.arrow_downward, color:  Colors.yellow[900],),
-          ) : Container(
-            child: Icon(Icons.arrow_downward, color: !confirm5 ?  Colors.red[900] : Colors.green[900],),
           ),
           terminalDepart(),
           finish(),
@@ -1005,7 +989,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
     );
   }
 
-  Widget middle() {
+  Widget terminalArrive() {
     return Container(
         padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
     child: Container(
@@ -1013,44 +997,10 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
       child: ListTile(
         dense: true,
         leading: Icon(Icons.looks_two, color: !confirm2 ? Colors.red : Colors.green,),
-        title: Text("1차지점 통과", style: TextStyle(fontSize: 20),),
-        subtitle: Text("1차 지점을 통과하였음에도 자동으로 진행이 안 될 때 누릅니다.",),
-        onTap: () {
-          !confirm2 ? alert("버스가 1차지점을 통과하였습니까?", 2) : alert("버스가 아직 1차지점을 출발하지 않았습니까?", 7);
-        },
-      ),
-    ),);
-  }
-
-  Widget arrive() {
-    return Container(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-    child: Container(
-      color: !confirm3 ? Colors.grey[100] : Colors.orange[200],
-      child: ListTile(
-        dense: true,
-        leading: Icon(Icons.looks_3, color: !confirm3 ? Colors.red : Colors.green,),
-        title: Text("2차 지점 통과, 도착(예정)", style: TextStyle(fontSize: 20),),
-        subtitle: Text("2차 지점을 통과하였음에도 자동으로 진행이 안 될 때 누릅니다.",),
-        onTap: () {
-          !confirm3 ? alert("버스가 2차 지점을 통과하였거나, 킨텍스 근처에 성공적으로 도착하셨습니까?", 3) : alert("버스가 아직 2차 지점이나 근처에 도착하지 않았습니까?", 8);
-        },
-      ),
-    ),);
-  }
-
-  Widget terminalArrive() {
-    return Container(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-    child: Container(
-      color: !confirm4 ? Colors.grey[100] : Colors.orange[200],
-      child: ListTile(
-        dense: true,
-        leading: Icon(Icons.looks_4, color: !confirm4 ? Colors.red : Colors.green,),
         title: Text("터미널(주차장) 도착", style: TextStyle(fontSize: 20),),
         subtitle: Text("터미널(주차장)에 도착하였을 때 누릅니다.",),
         onTap: () {
-          !confirm4 ? alert("버스가 터미널(주차장)에 정차하였습니까?", 4) : alert("버스가 아직 터미널(주차장)에 정차하지 않았습니까?", 9);
+          !confirm2 ? alert("버스가 터미널(주차장)에 정차하였습니까?", 4) : alert("버스가 아직 터미널(주차장)에 정차하지 않았습니까?", 9);
         },
       ),
     ),);
@@ -1060,14 +1010,14 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
     return Container(
         padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
     child: Container(
-      color: !confirm5 ? Colors.grey[100] : Colors.orange[200],
+      color: !confirm3 ? Colors.grey[100] : Colors.orange[200],
       child: ListTile(
         dense: true,
-        leading: Icon(Icons.looks_5, color: !confirm5 ? Colors.red : Colors.green,),
-        title: Text("터미널(주차장)출발", style: TextStyle(fontSize: 20),),
+        leading: Icon(Icons.looks_3, color: !confirm3 ? Colors.red : Colors.green,),
+        title: Text("앱종료", style: TextStyle(fontSize: 20),),
         subtitle: Text("모두 하차하고, 버스가 터미널(주차장)을 떠날 때 누릅니다.",),
         onTap: () {
-          !confirm5 ? alert("버스 승객이 모두 하차하였고, 버스가 터미널(주차장)을 빠져나왔습니까?", 5) : alert("버스가 아직 터미널(주차장)을 출발하지 않았습니까?", 10);
+          !confirm3 ? alert("버스 승객이 모두 하차하였고, 버스가 터미널(주차장)을 빠져나왔습니까?", 5) : alert("버스가 아직 터미널(주차장)을 출발하지 않았습니까?", 10);
         },
       ),
     ),);
@@ -1075,7 +1025,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
 
   Widget finish() {
     return ListTile(
-      title: confirm5 ? Text("수고하셨습니다!", style: TextStyle(fontSize: 14), textAlign: TextAlign.center,) : null,
+      title: confirm3 ? Text("수고하셨습니다!", style: TextStyle(fontSize: 14), textAlign: TextAlign.center,) : null,
     );
   }
 
@@ -1106,6 +1056,26 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("다음 단계가 이미 실행되었습니다. 다음 단계를 먼저 확인해주세요."),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('네'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> network() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("네트워크 오류"),
           actions: <Widget>[
             FlatButton(
               child: Text('네'),
@@ -1179,19 +1149,44 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                         }
                         _setBackground();
                         success();
+                      } else {
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       }
+                    }).catchError((e) {
+                      print(e.toString());
+                      setState(() {
+                        _isLoading = false;
+                      });
+                      network();
+                    });
+                    setState(() {
+                      _isLoading = false;
                     });
                     break;
-                  case 2:
+                  case 4:
                     if (confirm1) {
-                      status(prefs.getString("token"), "cp1").then((post) {
+                      status(prefs.getString("token"), "terminal").then((post) {
                         if (post.ok) {
                           setState(() {
                             confirm2 = true;
                             _isLoading = false;
                           });
                           success();
+                        } else {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          network();
                         }
+                      }).catchError((e) {
+                        print(e.toString());
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       });
                     } else {
                       confirm();
@@ -1199,54 +1194,21 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                         _isLoading = false;
                       });
                     }
+                    setState(() {
+                      _isLoading = false;
+                    });
                     break;
-                  case 3:
+                  case 5:
                     if (confirm2) {
-                      status(prefs.getString("token"), "cp2").then((post) {
+                      status(prefs.getString("token"), "end").then((post) {
                         if (post.ok) {
                           setState(() {
                             confirm3 = true;
                             _isLoading = false;
                           });
                           success();
-                        }
-                      });
-                    } else {
-                      confirm();
-                      setState(() {
-                        _isLoading = false;
-                      });
-                    }
-                    break;
-                  case 4:
-                    if (confirm3) {
-                      status(prefs.getString("token"), "terminal").then((post) {
-                        if (post.ok) {
-                          setState(() {
-                            confirm4 = true;
-                            _isLoading = false;
-                          });
-                          success();
-                        }
-                      });
-                    } else {
-                      confirm();
-                      setState(() {
-                        _isLoading = false;
-                      });
-                    }
-                    break;
-                  case 5:
-                    if (confirm4) {
-                      status(prefs.getString("token"), "end").then((post) {
-                        if (post.ok) {
-                          setState(() {
-                            confirm5 = true;
-                            _isLoading = false;
-                          });
-                          success();
                           if (Platform.isAndroid) {
-                            streamListen.cancel();
+                            if (streamListen != null) { streamListen.cancel(); }
                             location = null;
                           }
                           try {
@@ -1254,7 +1216,18 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                           } on Exception catch (e) {
                             e.toString();
                           }
+                        } else {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          network();
                         }
+                      }).catchError((e) {
+                        print(e.toString());
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       });
                     } else {
                       confirm();
@@ -1262,6 +1235,9 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                         _isLoading = false;
                       });
                     }
+                    setState(() {
+                      _isLoading = false;
+                    });
                     break;
                   case 6:
                     if (!confirm2) {
@@ -1272,7 +1248,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                             _isLoading = false;
                           });
                           if (Platform.isAndroid) {
-                            streamListen.cancel();
+                            if (streamListen != null) { streamListen.cancel(); }
                             location = null;
                           }
                           try {
@@ -1281,7 +1257,18 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                             e.toString();
                           }
                           success();
+                        } else {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                          network();
                         }
+                      }).catchError((e) {
+                        print(e.toString());
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       });
                     } else {
                       confirm02();
@@ -1289,8 +1276,11 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                         _isLoading = false;
                       });
                     }
+                    setState(() {
+                      _isLoading = false;
+                    });
                     break;
-                  case 7:
+                  case 9:
                     if (!confirm3) {
                       status(prefs.getString("token"), "start").then((post) {
                         if (post.ok) {
@@ -1299,25 +1289,18 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                             _isLoading = false;
                           });
                           success();
-                        }
-                      });
-                    } else {
-                      confirm02();
-                      setState(() {
-                        _isLoading = false;
-                      });
-                    }
-                    break;
-                  case 8:
-                    if (!confirm4) {
-                      status(prefs.getString("token"), "cp1").then((post) {
-                        if (post.ok) {
+                        } else {
                           setState(() {
-                            confirm3 = false;
                             _isLoading = false;
                           });
-                          success();
+                          network();
                         }
+                      }).catchError((e) {
+                        print(e.toString());
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       });
                     } else {
                       confirm02();
@@ -1325,37 +1308,39 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
                         _isLoading = false;
                       });
                     }
-                    break;
-                  case 9:
-                    if (!confirm5) {
-                      status(prefs.getString("token"), "cp2").then((post) {
-                        if (post.ok) {
-                          setState(() {
-                            confirm4 = false;
-                            _isLoading = false;
-                          });
-                          success();
-                        }
-                      });
-                    } else {
-                      confirm02();
-                      setState(() {
-                        _isLoading = false;
-                      });
-                    }
+                    setState(() {
+                      _isLoading = false;
+                    });
                     break;
                   case 10:
                     status(prefs.getString("token"), "terminal").then((post) {
                       if (post.ok) {
                         setState(() {
-                          confirm5 = false;
+                          confirm3 = false;
                           _isLoading = false;
                         });
                         success();
+                      } else {
+                        setState(() {
+                          _isLoading = false;
+                        });
+                        network();
                       }
+                    }).catchError((e) {
+                      print(e.toString());
+                      setState(() {
+                        _isLoading = false;
+                      });
+                      network();
+                    });
+                    setState(() {
+                      _isLoading = false;
                     });
                     break;
                   default:
+                    setState(() {
+                      _isLoading = false;
+                    });
                     break;
                 }
                 // 데이터 전송

@@ -129,8 +129,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
     await version().then((data) async {
       if (data != null && data['reason'] > int.parse(packageInfo.buildNumber)) { // 최근 앱 버전 확인
+        print(data['reason']);
         alertMessage();
       }
+    }).catchError((e) {
+      print(e.toString());
     });
   }
 

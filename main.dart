@@ -182,7 +182,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: new ListView(
           shrinkWrap: true,
           children: <Widget>[
-            _showImage(),
+//            _showImage(),
             Padding(padding: const EdgeInsets.fromLTRB(0.0, 5.0, 0.0, 0.0),),
             Text("SIC2019 주차지원", textAlign: TextAlign.center,
               style: TextStyle(color: Colors.green[900], fontSize: 20.0, fontWeight: FontWeight.bold),

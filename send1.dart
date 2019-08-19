@@ -48,8 +48,8 @@ class Step {
   static const RETURN_END = 24;
 }
 
-class SendApp extends StatefulWidget {
-  SendApp(String com) {
+class Send1App extends StatefulWidget {
+  Send1App(String com) {
     commit = com;
   }
 
@@ -57,14 +57,12 @@ class SendApp extends StatefulWidget {
   _MyAppState createState() => new _MyAppState();
 }
 
-class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
+class _MyAppState extends State<Send1App> with TickerProviderStateMixin {
   bool _isLoading = false;
   SharedPreferences prefs;
   StreamSubscription<LocationData> streamListen;
 
   Map<String, dynamic> info;
-
-//  bool check = false;
 
   bool confirm1 = false;
   bool confirm2 = false;
@@ -144,11 +142,11 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
       },
     );
     _firebaseMessaging.requestNotificationPermissions(
-      const IosNotificationSettings(
-        alert: true,
-        badge: true,
-        sound: true,
-      )
+        const IosNotificationSettings(
+          alert: true,
+          badge: true,
+          sound: true,
+        )
     );
     _firebaseMessaging.onIosSettingsRegistered.listen((IosNotificationSettings settings) {
       print("Ios Setting Registed");
@@ -321,61 +319,61 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
     return new MaterialApp(
         title: '오전 화면',
         theme: ThemeData(
-        primaryColor: Colors.green[900],
-        bottomAppBarColor: Colors.grey[300],
-    ),
-    home: Scaffold(
-      appBar: new AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: new Text("2019SIC 주차 지원", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20,),),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () {
-              currentUser();
-            },
-          ),
-        ],
-      ),
-      body: Stack(
-        children: <Widget>[
-          _showBody(),
-          _showCircularProgress()
-        ],
-      ),
-      drawer: Drawer(
-        // Add a ListView to the drawer. This ensures the user can scroll
-        // through the options in the drawer if there isn't enough vertical
-        // space to fit everything.
-        child: (info != null) ?
-        ListView(
-          // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            Container(
-              height: 90.0,
-              child: DrawerHeader(
-                child:  Text("2019SIC 주차 지원", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),),
-                decoration: BoxDecoration(
-                  color: Colors.green[900],
-                ),
+          primaryColor: Colors.green[900],
+          bottomAppBarColor: Colors.grey[300],
+        ),
+        home: Scaffold(
+          appBar: new AppBar(
+            // Here we take the value from the MyHomePage object that was created by
+            // the App.build method, and use it to set our appbar title.
+            title: new Text("2019SIC 주차 지원", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20,),),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(Icons.refresh),
+                onPressed: () {
+                  currentUser();
+                },
               ),
-            ),
-            ListTile(
-              title: Text('내 정보', style: TextStyle(fontWeight: FontWeight.bold),),
-              leading: Icon(Icons.account_box),
-            ),
-            Container(
-              color: Colors.grey[100],
-              padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-              child: Text((info['bus_name'] ?? "") + "\n" + "버스 n대 중 1호차" + "\n" + (info['bus_guide_name'] ?? "") + "\n" + (info['bus_guide_phone'] ?? "")),
-            ),
-            Container(
-              color: Colors.grey[300],
-              padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-              child: Text("첫째날(금요일) - (준비중)" + "\n" + "둘째날(토요일) - (준비중)" + "\n" + "셋째날(일요일) - (준비중)"),
-            ),
+            ],
+          ),
+          body: Stack(
+            children: <Widget>[
+              _showBody(),
+              _showCircularProgress()
+            ],
+          ),
+          drawer: Drawer(
+            // Add a ListView to the drawer. This ensures the user can scroll
+            // through the options in the drawer if there isn't enough vertical
+            // space to fit everything.
+            child: (info != null) ?
+            ListView(
+              // Important: Remove any padding from the ListView.
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                Container(
+                  height: 90.0,
+                  child: DrawerHeader(
+                    child:  Text("2019SIC 주차 지원", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),),
+                    decoration: BoxDecoration(
+                      color: Colors.green[900],
+                    ),
+                  ),
+                ),
+                ListTile(
+                  title: Text('내 정보', style: TextStyle(fontWeight: FontWeight.bold),),
+                  leading: Icon(Icons.account_box),
+                ),
+                Container(
+                  color: Colors.grey[100],
+                  padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                  child: Text((info['bus_name'] ?? "") + "\n" + "버스 n대 중 1호차" + "\n" + (info['bus_guide_name'] ?? "") + "\n" + (info['bus_guide_phone'] ?? "")),
+                ),
+                Container(
+                  color: Colors.grey[300],
+                  padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
+                  child: Text("첫째날(금요일) - (준비중)" + "\n" + "둘째날(토요일) - (준비중)" + "\n" + "셋째날(일요일) - (준비중)"),
+                ),
 //              ListTile(
 //                title: Text('앱 사용법 (준비중)', style: TextStyle(fontWeight: FontWeight.bold),),
 //                leading: Icon(Icons.announcement),
@@ -447,74 +445,74 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
 //                  ],
 //                ),
 //              ),
-            Container(
-              padding: EdgeInsets.fromLTRB(50, 200, 50, 0),
-              child: RaisedButton(
-                color: Colors.green[900],
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                onPressed: logout,
-                child: new Text('로그아웃',
-                    style: new TextStyle(fontSize: 20.0, color: Colors.white)),
-              ),
-            ),
-            Row(
-                children: <Widget>[
-                  Expanded(
-                      child: Divider(height: 5, color: Colors.black,)
+                Container(
+                  padding: EdgeInsets.fromLTRB(50, 200, 50, 0),
+                  child: RaisedButton(
+                    color: Colors.green[900],
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    onPressed: logout,
+                    child: new Text('로그아웃',
+                        style: new TextStyle(fontSize: 20.0, color: Colors.white)),
                   ),
-                ]
-            ),
-            Container(
-              padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
-              child: RaisedButton(
-                color: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                onPressed: () {
-                  _change();
-                },
-                child: new Text('비밀번호 변경',
-                    style: new TextStyle(fontSize: 20.0, color: Colors.green[900])),
-              ),
-            ),
-          ],
-        )
-            : ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            Container(
-              height: 90.0,
-              child: DrawerHeader(
-                child:  Text("2019SIC 주차 지원", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),),
-                decoration: BoxDecoration(
-                  color: Colors.green[900],
                 ),
-              ),
+                Row(
+                    children: <Widget>[
+                      Expanded(
+                          child: Divider(height: 5, color: Colors.black,)
+                      ),
+                    ]
+                ),
+                Container(
+                  padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
+                  child: RaisedButton(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    onPressed: () {
+                      _change();
+                    },
+                    child: new Text('비밀번호 변경',
+                        style: new TextStyle(fontSize: 20.0, color: Colors.green[900])),
+                  ),
+                ),
+              ],
+            )
+                : ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                Container(
+                  height: 90.0,
+                  child: DrawerHeader(
+                    child:  Text("2019SIC 주차 지원", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),),
+                    decoration: BoxDecoration(
+                      color: Colors.green[900],
+                    ),
+                  ),
+                ),
+                Text("접근 권한 오류", textAlign: TextAlign.center,),
+                Container(
+                  padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
+                  child: RaisedButton(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    onPressed: currentUser,
+                    child: new Text('새로고침',
+                        style: new TextStyle(fontSize: 20.0, color: Colors.green[900])),
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
+                  child: RaisedButton(
+                    color: Colors.green[900],
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    onPressed: logout,
+                    child: new Text('로그아웃',
+                        style: new TextStyle(fontSize: 20.0, color: Colors.white)),
+                  ),
+                ),
+              ],
             ),
-            Text("접근 권한 오류", textAlign: TextAlign.center,),
-            Container(
-              padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
-              child: RaisedButton(
-                color: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                onPressed: currentUser,
-                child: new Text('새로고침',
-                    style: new TextStyle(fontSize: 20.0, color: Colors.green[900])),
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.fromLTRB(50, 0, 50, 0),
-              child: RaisedButton(
-                color: Colors.green[900],
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                onPressed: logout,
-                child: new Text('로그아웃',
-                    style: new TextStyle(fontSize: 20.0, color: Colors.white)),
-              ),
-            ),
-          ],
-        ),
-      ),
-    )
+          ),
+        )
     );
   }
 
@@ -737,54 +735,54 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
 
   Widget depart() {
     return Container(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-    child: Container(
-      color: !confirm1 ? Colors.grey[100] : Colors.orange[200],
-      child: ListTile(
-        dense: true,
-        leading: Icon(Icons.looks_one, color: !confirm1 ? Colors.red : Colors.green,),
-        title: Text("출발", style: TextStyle(fontSize: 20),),
-        subtitle: Text("버스가 출발하였을 때 누릅니다. \nGPS가 켜져있는지도 확인해주세요.",),
-        onTap: () {
-          !confirm1 ? alert("버스가 출발하였습니까?", 1) : alert("버스가 출발하지 않았습니까?", 6);
-        },
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: Container(
+        color: !confirm1 ? Colors.grey[100] : Colors.orange[200],
+        child: ListTile(
+          dense: true,
+          leading: Icon(Icons.looks_one, color: !confirm1 ? Colors.red : Colors.green,),
+          title: Text("출발", style: TextStyle(fontSize: 20),),
+          subtitle: Text("버스가 출발하였을 때 누릅니다. \nGPS가 켜져있는지도 확인해주세요.",),
+          onTap: () {
+            !confirm1 ? alert("버스가 출발하였습니까?", 1) : alert("버스가 출발하지 않았습니까?", 6);
+          },
+        ),
       ),
-    ),
     );
   }
 
   Widget terminalArrive() {
     return Container(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-    child: Container(
-      color: !confirm2 ? Colors.grey[100] : Colors.orange[200],
-      child: ListTile(
-        dense: true,
-        leading: Icon(Icons.looks_two, color: !confirm2 ? Colors.red : Colors.green,),
-        title: Text("터미널(주차장) 도착", style: TextStyle(fontSize: 20),),
-        subtitle: Text("터미널(주차장)에 도착하였을 때 누릅니다.",),
-        onTap: () {
-          !confirm2 ? alert("버스가 터미널(주차장)에 정차하였습니까?", 4) : alert("버스가 아직 터미널(주차장)에 정차하지 않았습니까?", 9);
-        },
-      ),
-    ),);
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: Container(
+        color: !confirm2 ? Colors.grey[100] : Colors.orange[200],
+        child: ListTile(
+          dense: true,
+          leading: Icon(Icons.looks_two, color: !confirm2 ? Colors.red : Colors.green,),
+          title: Text("터미널(주차장) 도착", style: TextStyle(fontSize: 20),),
+          subtitle: Text("터미널(주차장)에 도착하였을 때 누릅니다.",),
+          onTap: () {
+            !confirm2 ? alert("버스가 터미널(주차장)에 정차하였습니까?", 4) : alert("버스가 아직 터미널(주차장)에 정차하지 않았습니까?", 9);
+          },
+        ),
+      ),);
   }
 
   Widget terminalDepart() {
     return Container(
-        padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
-    child: Container(
-      color: !confirm3 ? Colors.grey[100] : Colors.orange[200],
-      child: ListTile(
-        dense: true,
-        leading: Icon(Icons.looks_3, color: !confirm3 ? Colors.red : Colors.green,),
-        title: Text("앱종료", style: TextStyle(fontSize: 20),),
-        subtitle: Text("모두 하차하고, 버스가 터미널(주차장)을 떠날 때 누릅니다.",),
-        onTap: () {
-          !confirm3 ? alert("버스 승객이 모두 하차하였고, 버스가 터미널(주차장)을 빠져나왔습니까?", 5) : alert("버스가 아직 터미널(주차장)을 출발하지 않았습니까?", 10);
-        },
-      ),
-    ),);
+      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: Container(
+        color: !confirm3 ? Colors.grey[100] : Colors.orange[200],
+        child: ListTile(
+          dense: true,
+          leading: Icon(Icons.looks_3, color: !confirm3 ? Colors.red : Colors.green,),
+          title: Text("앱종료", style: TextStyle(fontSize: 20),),
+          subtitle: Text("모두 하차하고, 버스가 터미널(주차장)을 떠날 때 누릅니다.",),
+          onTap: () {
+            !confirm3 ? alert("버스 승객이 모두 하차하였고, 버스가 터미널(주차장)을 빠져나왔습니까?", 5) : alert("버스가 아직 터미널(주차장)을 출발하지 않았습니까?", 10);
+          },
+        ),
+      ),);
   }
 
   Widget finish() {

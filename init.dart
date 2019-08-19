@@ -13,6 +13,23 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:pdsample/change.dart';
 import 'package:package_info/package_info.dart';
 
+class Step {
+  static const DEPARTURE_INFO_REQUEST = 0;
+  static const DEPARTURE_READY = 10;
+  static const DEPARTURE_START = 11;
+  static const DEPARTURE_CP_1 = 12;
+  static const DEPARTURE_CP_2 = 13;
+  static const DEPARTURE_TERMINAL = 14;
+  static const DEPARTURE_END = 15;
+
+  static const RETURN_REQUEST = 20;
+  static const RETURN_READY = 21;
+  static const RETURN_CALL = 22;
+  static const RETURN_TERMINAL = 23;
+  static const RETURN_RIDE = 24;
+  static const RETURN_END = 24;
+}
+
 class Post {
   final bool ok;
   final String token;
@@ -194,7 +211,7 @@ class _MyAppState extends State<InitPage> {
               Container(
                 color: Colors.grey[300],
                 padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-                child: Text("첫째날(금요일) - 1전시장 터미널" + "\n" + "둘째날(토요일) - 2전시장 터미널" + "\n" + "셋째날(일요일) - 1전시장 터미널"),
+                child: Text("첫째날(금요일) - (준비중)" + "\n" + "둘째날(토요일) - (준비중)" + "\n" + "셋째날(일요일) - (준비중)"),
               ),
 //              ListTile(
 //                title: Text('앱 사용법 (준비중)', style: TextStyle(fontWeight: FontWeight.bold),),
@@ -540,7 +557,7 @@ class _MyAppState extends State<InitPage> {
         "bus_guide_phone": _guideNumber,
         "bus_number": _busCode,
         "bus_driver_phone": _busNumber,
-        "status": _status, /// 킨텍스 거리에 따라 바뀌어야 함
+        "status": _status,
         "bus_day": 0, /// 매일 바뀌어야 함
       }),
       headers: {
@@ -559,7 +576,7 @@ class _MyAppState extends State<InitPage> {
     if (form.validate()) {
       form.save();
 
-      await fetchPost(prefs.getString('token'), _guideName, _guideNumber, _busCode, _busNumber, _timeline == Timeline.morning ? "dReady" : "request").then((post) async {
+      await fetchPost(prefs.getString('token'), _guideName, _guideNumber, _busCode, _busNumber, _timeline == Timeline.morning ? (info['bus_step'] > Step.DEPARTURE_START && info['bus_step'] <= Step.DEPARTURE_END ? "default" : "dReady") : (info['bus_step'] > Step.RETURN_REQUEST && info['bus_step'] <= Step.RETURN_END ? "default" : "request")).then((post) async {
         if (post.ok) {
           if (_timeline == Timeline.morning) {
             Navigator.pushReplacement(

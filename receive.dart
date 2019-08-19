@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pdsample/init.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show utf8, json;
-import 'package:pdsample/map.dart';
+import 'package:pdsample/temp.dart';
 
 String commit;
 
@@ -56,7 +56,6 @@ class ReceiveApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
-  String _email = "temporary10@pdsample.com"; // 계정 이름
   bool _isLoading = false;
 
   bool confirm1 = false;
@@ -66,7 +65,6 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
 
   AnimationController _animationController;
 
-  Timeline _timeline = Timeline.afternoon;
   String _commitDate = commit;
 
   SharedPreferences prefs;
@@ -77,10 +75,6 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
 
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-
-  static const platform = const MethodChannel('sample.hyla981020.com/bg');
-
-  int _count = 0;
 
   void currentUser() async {
     prefs = await SharedPreferences.getInstance();
@@ -148,6 +142,12 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
         print(e.toString());
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<Init> status(String _token, String _status) async {
@@ -262,7 +262,7 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
             Container(
               color: Colors.grey[300],
               padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-              child: Text("첫째날(금요일) - 1전시장 터미널" + "\n" + "둘째날(토요일) - 2전시장 터미널" + "\n" + "셋째날(일요일) - 1전시장 터미널"),
+              child: Text("첫째날(금요일) - (준비중)" + "\n" + "둘째날(토요일) - (준비중)" + "\n" + "셋째날(일요일) - (준비중)"),
             ),
 //              ListTile(
 //                title: Text('앱 사용법 (준비중)', style: TextStyle(fontWeight: FontWeight.bold),),
@@ -634,12 +634,12 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                 padding: EdgeInsets.zero,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 color: Colors.blue,
-                onPressed: () async {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Maps(title: "1터미널",)), /// 터미널에 따라 지도 모양 다르게
-                  );
-                },
+//                onPressed: () async {
+//                  Navigator.push(
+//                    context,
+//                    MaterialPageRoute(builder: (context) => Maps(title: "1터미널",)), /// 터미널에 따라 지도 모양 다르게
+//                  );
+//                },
                 child: Container(
                   padding: EdgeInsets.all(10.0),
                   child: Text("확인", style: TextStyle(fontSize: 10.0, color: Colors.white,),),

@@ -46,9 +46,14 @@ class Step {
   static const RETURN_END = 24;
 }
 
+Map<String, dynamic> dataInt = new Map();
+
 class Receive1App extends StatefulWidget {
   Receive1App(String com) {
     commit = com;
+    dataInt['첫째날(금) 09-13'] = 0;
+    dataInt['둘째날(토) 09-14'] = 1;
+    dataInt['셋째날(일) 09-15'] = 2;
   }
 
   @override
@@ -68,6 +73,7 @@ class _MyAppState extends State<Receive1App> with TickerProviderStateMixin {
   SharedPreferences prefs;
 
   Map<String, dynamic> info;
+  Map<String, dynamic> summary;
 
   Widget circle = Center(child: CircularProgressIndicator());
 
@@ -86,6 +92,14 @@ class _MyAppState extends State<Receive1App> with TickerProviderStateMixin {
         } else if (info['bus_step'] >= Step.RETURN_READY) {
           confirm1 = true;
         }
+      }
+    });
+    await _summary().then((data) {
+      if (data != null && data['ok']) {
+        setState(() {
+          print(data);
+          summary = data;
+        });
       }
     });
   }
@@ -189,6 +203,18 @@ class _MyAppState extends State<Receive1App> with TickerProviderStateMixin {
     return json.decode(utf8.decode(response.bodyBytes));
   }
 
+  Future<Map<String, dynamic>> _summary() async {
+    prefs = await SharedPreferences.getInstance();
+    final response = await http.get (
+      "https://ip2019.tk/guide/api/summary?token=" + prefs.getString("token"),
+      headers: {
+        "content-type" : "application/json",
+        "accept" : "application/json",
+      },
+    );
+    return json.decode(utf8.decode(response.bodyBytes));
+  }
+
   Widget _showCircularProgress() {
     if (_isLoading) {
       return Center(child: CircularProgressIndicator());
@@ -229,7 +255,7 @@ class _MyAppState extends State<Receive1App> with TickerProviderStateMixin {
             // Add a ListView to the drawer. This ensures the user can scroll
             // through the options in the drawer if there isn't enough vertical
             // space to fit everything.
-            child: (info != null) ?
+            child: (info != null && summary != null) ?
             ListView(
               // Important: Remove any padding from the ListView.
               padding: EdgeInsets.zero,
@@ -250,12 +276,14 @@ class _MyAppState extends State<Receive1App> with TickerProviderStateMixin {
                 Container(
                   color: Colors.grey[100],
                   padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-                  child: Text((info['bus_name'] ?? "") + "\n" + "버스 n대 중 1호차" + "\n" + (info['bus_guide_name'] ?? "") + "\n" + (info['bus_guide_phone'] ?? "")),
+                  child: Text((info['bus_name'] ?? "") + "\n" + "버스 " + summary['bus_total'].toString() + "대 중 " + summary['bus_index'].toString() + "호차\n" + (info['bus_guide_name'] ?? "") + "\n" + (info['bus_guide_phone'] ?? "")),
                 ),
                 Container(
                   color: Colors.grey[300],
                   padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-                  child: Text("첫째날(금요일) - (준비중)" + "\n" + "둘째날(토요일) - (준비중)" + "\n" + "셋째날(일요일) - (준비중)"),
+                  child: Text("첫째날(금요일)\n    오전: " + summary['bus_target'][0] + "\n    오후: " + summary['bus_return'][0] + "\n\n"
+                      + "둘째날(토요일)\n    오전: " + summary['bus_target'][1] + "\n    오후: " + summary['bus_return'][1] + "\n\n"
+                      + "셋째날(일요일)\n    오전: " + summary['bus_target'][2] + "\n    오후: " + summary['bus_return'][2]),
                 ),
 //              ListTile(
 //                title: Text('앱 사용법 (준비중)', style: TextStyle(fontWeight: FontWeight.bold),),
@@ -414,7 +442,7 @@ class _MyAppState extends State<Receive1App> with TickerProviderStateMixin {
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: Text((info['bus_name']  ?? "")  + "/" + "차량1" + "/" + (info['bus_guide_name']  ?? "")  + "/" + (info['bus_guide_phone'] ?? "" ), style: TextStyle(fontSize: 13.0),),
+                  child: Text((info['bus_name']  ?? "")  + "/" + (info['bus_guide_name']  ?? "")  + "/" + (info['bus_guide_phone'] ?? "" ), style: TextStyle(fontSize: 13.0),),
                 ),
                 Container(
                   alignment: Alignment.centerRight,
@@ -474,7 +502,7 @@ class _MyAppState extends State<Receive1App> with TickerProviderStateMixin {
               ],
             ),
           ) : Container(),
-          (info != null) ? Container(
+          (info != null && summary != null) ? Container(
             padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
             child: Row(
               children: <Widget>[
@@ -482,7 +510,7 @@ class _MyAppState extends State<Receive1App> with TickerProviderStateMixin {
                   child: Text("터미널(주차장) 정보", style: TextStyle(fontSize: 14.0,),),
                 ),
                 Expanded(
-                  child: Text("1전시장 터미널", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.pink),),
+                  child: Text(summary['bus_target'][dataInt[_commitDate]] ?? "오류", style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.pink),),
                 ),
 //                Container(
 //                  alignment: Alignment.centerRight,

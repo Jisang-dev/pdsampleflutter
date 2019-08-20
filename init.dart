@@ -7,7 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pdsample/main.dart';
 import 'package:pdsample/send.dart';
+import 'package:pdsample/send1.dart';
 import 'package:pdsample/receive.dart';
+import 'package:pdsample/receive1.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:pdsample/change.dart';
@@ -116,6 +118,7 @@ class _MyAppState extends State<InitPage> {
 
   SharedPreferences prefs;
   Map<String, dynamic> info;
+  Map<String, dynamic> summary;
   PackageInfo packageInfo;
 
   Timeline _timeline = (new DateTime.now().hour < 12) ? Timeline.morning : Timeline.afternoon;
@@ -143,6 +146,7 @@ class _MyAppState extends State<InitPage> {
     await _user().then((data) {
       if (data != null && data['ok']) {
         setState(() {
+          print(data);
           info = data['bus_info'];
           print(info);
           _guideName = data['bus_info']['bus_guide_name'] ?? "";
@@ -151,6 +155,15 @@ class _MyAppState extends State<InitPage> {
           _busNumber = data['bus_info']['bus_driver_phone'] ?? "";
           controller3.text = data['bus_info']['bus_number'] ?? "";
           controller4.text = data['bus_info']['bus_driver_phone'] ?? "";
+        });
+      }
+    });
+
+    await _summary().then((data) {
+      if (data != null && data['ok']) {
+        setState(() {
+          print(data);
+          summary = data;
         });
       }
     });
@@ -185,7 +198,7 @@ class _MyAppState extends State<InitPage> {
           // Add a ListView to the drawer. This ensures the user can scroll
           // through the options in the drawer if there isn't enough vertical
           // space to fit everything.
-          child: (info != null) ?
+          child: (info != null && summary != null) ?
           ListView(
             // Important: Remove any padding from the ListView.
             padding: EdgeInsets.zero,
@@ -206,12 +219,14 @@ class _MyAppState extends State<InitPage> {
               Container(
                 color: Colors.grey[100],
                 padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-                child: Text((info['bus_name'] ?? "") + "\n" + "버스 n대 중 1호차" + "\n" + (info['bus_guide_name'] ?? "") + "\n" + (info['bus_guide_phone'] ?? "")),
+                child: Text((info['bus_name'] ?? "") + "\n" + "버스 " + summary['bus_total'].toString() + "대 중 " + summary['bus_index'].toString() + "호차\n" + (info['bus_guide_name'] ?? "") + "\n" + (info['bus_guide_phone'] ?? "")),
               ),
               Container(
                 color: Colors.grey[300],
                 padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-                child: Text("첫째날(금요일) - (준비중)" + "\n" + "둘째날(토요일) - (준비중)" + "\n" + "셋째날(일요일) - (준비중)"),
+                child: Text("첫째날(금요일)\n    오전: " + summary['bus_target'][0] + "\n    오후: " + summary['bus_return'][0] + "\n\n"
+                    + "둘째날(토요일)\n    오전: " + summary['bus_target'][1] + "\n    오후: " + summary['bus_return'][1] + "\n\n"
+                    + "셋째날(일요일)\n    오전: " + summary['bus_target'][2] + "\n    오후: " + summary['bus_return'][2]),
               ),
 //              ListTile(
 //                title: Text('앱 사용법 (준비중)', style: TextStyle(fontWeight: FontWeight.bold),),
@@ -540,6 +555,18 @@ class _MyAppState extends State<InitPage> {
     prefs = await SharedPreferences.getInstance();
     final response = await http.get (
       "https://ip2019.tk/guide/api?token=" + prefs.getString("token"),
+      headers: {
+        "content-type" : "application/json",
+        "accept" : "application/json",
+      },
+    );
+    return json.decode(utf8.decode(response.bodyBytes));
+  }
+
+  Future<Map<String, dynamic>> _summary() async {
+    prefs = await SharedPreferences.getInstance();
+    final response = await http.get (
+      "https://ip2019.tk/guide/api/summary?token=" + prefs.getString("token"),
       headers: {
         "content-type" : "application/json",
         "accept" : "application/json",

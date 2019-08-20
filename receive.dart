@@ -535,10 +535,10 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
             ),
           ) : Container(),
           new SizedBox(
-            height: 10.0,
+            height: 12.0,
             child: new Center(
               child: new Container(
-                height: 5.0,
+                height: 12.0,
                 color: Colors.green[900],
               ),
             ),
@@ -668,7 +668,7 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
           dense: true,
           leading: Icon(Icons.looks_4, color: !confirm4 ? Colors.red : Colors.green,),
           title: Text("승차 완료, 출발 (앱종료)", style: TextStyle(fontSize: 20),),
-          subtitle: Text("모두 승차하고, 버스가 터미널(주차장)을 떠날 때 누릅니다.",),
+          subtitle: Text("모두 승차하고, 버스가 터미널을 떠날 때 누릅니다.",),
           onTap: () {
             !confirm4 ? alert("버스에 승객이 모두 승차하였고, 터미널을 빠져나왔습니까?", 4) : alert("버스에 승객이 승차하지 않았습니까? 또는 아직 터미널을 빠져나오지 않았습니까?", 9);
           },

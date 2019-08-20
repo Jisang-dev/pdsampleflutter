@@ -14,6 +14,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert' show utf8, json;
 
 int timestamp;
+int cycle = 60000;
 String commit;
 
 Future<Post> updateToken(String _token, String notification) async {
@@ -93,7 +94,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
 
   void currentUser() async {
     prefs = await SharedPreferences.getInstance();
-    await _user().then((data) {
+    await _user().then((data) async {
       if (data != null && data['ok']) {
         setState(() {
           info = data['bus_info'];
@@ -103,6 +104,16 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
           confirm1 = confirm2 = confirm3 = true;
         } else if (info['bus_step'] == Step.DEPARTURE_TERMINAL) {
           confirm1 = confirm2 = true;
+          if (Platform.isAndroid) {
+            cycle = 60000;
+            _count = 0;
+          } else {
+            try {
+              await platform.invokeMethod('start'); // 아이폰 주기 관리
+            } on Exception catch (e) {
+              print(e.toString());
+            }
+          }
         } else if (info['bus_step'] < Step.DEPARTURE_TERMINAL && info['bus_step'] >= Step.DEPARTURE_START) {
           confirm1 = true;
           platform.setMethodCallHandler((call) {
@@ -114,8 +125,36 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
             sample();
           }
           _setBackground();
+          if (Platform.isAndroid) {
+            if (info['bus_step'] == Step.DEPARTURE_CP_2) {
+              cycle = 5000;
+            } else if (info['bus_step'] == Step.DEPARTURE_CP_1) {
+              cycle = 30000;
+            } else if (info['bus_step'] == Step.DEPARTURE_START) {
+              cycle = 60000;
+            }
+          } else {
+            if (info['bus_step'] == Step.DEPARTURE_CP_2) {
+              try {
+                await platform.invokeMethod('cp2'); // 아이폰 주기 관리
+              } on Exception catch (e) {
+                print(e.toString());
+              }
+            } else if (info['bus_step'] == Step.DEPARTURE_CP_1) {
+              try {
+                await platform.invokeMethod('cp1'); // 아이폰 주기 관리
+              } on Exception catch (e) {
+                print(e.toString());
+              }
+            } else if (info['bus_step'] == Step.DEPARTURE_START) {
+              try {
+                await platform.invokeMethod('start'); // 아이폰 주기 관리
+              } on Exception catch (e) {
+                print(e.toString());
+              }
+            }
+          }
         }
-
       }
     });
   }
@@ -125,6 +164,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
     _animationController = new AnimationController(vsync: this, duration: Duration(seconds: 1));
     _animationController.repeat();
     super.initState();
+    cycle = 60000;
     currentUser();
     timestamp = (Platform.isAndroid ? DateTime.now().millisecondsSinceEpoch : 0);
 
@@ -270,7 +310,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
 //    await location.changeSettings(distanceFilter: 400, accuracy: LocationAccuracy.BALANCED);
     if (await location.requestPermission()) {
       streamListen = location.onLocationChanged().listen((LocationData currentLocation) async {
-        if (_count < 150 && currentLocation.time.toInt() > _count * 60000 + timestamp) {
+        if (currentLocation.time.toInt() > _count * cycle + timestamp) {
           await fetchPost(prefs.getString("token"), (currentLocation.latitude*1000000).toInt(), (currentLocation.longitude*1000000).toInt()).then((post) {
             if (post.ok) {
               print("success");
@@ -279,21 +319,11 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
             }
           });
           _count++;
-          if (_count < (currentLocation.time.toInt() - timestamp) ~/ 60000) {
-            _count = (currentLocation.time.toInt() - timestamp) ~/ 60000;
-          }
-        }
-        if (_count > 150) {
-          if (streamListen != null) { streamListen.cancel(); }
-          location = null;
-          try {
-            await platform.invokeMethod('stop');
-          } on Exception catch (e) {
-            e.toString();
+          if (_count < (currentLocation.time.toInt() - timestamp) ~/ cycle) {
+            _count = (currentLocation.time.toInt() - timestamp) ~/ cycle;
           }
         }
       });
-
     }
   }
 
@@ -700,10 +730,10 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
             ),
           ) : Container(),
           new SizedBox(
-            height: 10.0,
+            height: 12.0,
             child: new Center(
               child: new Container(
-                height: 5.0,
+                height: 12.0,
                 color: Colors.green[900],
               ),
             ),
@@ -761,10 +791,10 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
       child: ListTile(
         dense: true,
         leading: Icon(Icons.looks_two, color: !confirm2 ? Colors.red : Colors.green,),
-        title: Text("터미널(주차장) 도착", style: TextStyle(fontSize: 20),),
-        subtitle: Text("터미널(주차장)에 도착하였을 때 누릅니다.",),
+        title: Text("터미널 도착", style: TextStyle(fontSize: 20),),
+        subtitle: Text("터미널에 도착하였을 때 누릅니다.",),
         onTap: () {
-          !confirm2 ? alert("버스가 터미널(주차장)에 정차하였습니까?", 4) : alert("버스가 아직 터미널(주차장)에 정차하지 않았습니까?", 9);
+          !confirm2 ? alert("버스가 터미널에 정차하였습니까?", 4) : alert("버스가 아직 터미널에 정차하지 않았습니까?", 9);
         },
       ),
     ),);
@@ -779,9 +809,9 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
         dense: true,
         leading: Icon(Icons.looks_3, color: !confirm3 ? Colors.red : Colors.green,),
         title: Text("앱종료", style: TextStyle(fontSize: 20),),
-        subtitle: Text("모두 하차하고, 버스가 터미널(주차장)을 떠날 때 누릅니다.",),
+        subtitle: Text("모두 하차하고, 버스가 터미널을 떠날 때 누릅니다.",),
         onTap: () {
-          !confirm3 ? alert("버스 승객이 모두 하차하였고, 버스가 터미널(주차장)을 빠져나왔습니까?", 5) : alert("버스가 아직 터미널(주차장)을 출발하지 않았습니까?", 10);
+          !confirm3 ? alert("버스 승객이 모두 하차하였고, 버스가 터미널을 빠져나왔습니까?", 5) : alert("버스가 아직 터미널을 출발하지 않았습니까?", 10);
         },
       ),
     ),);

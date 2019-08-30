@@ -544,7 +544,7 @@ class _MyAppState extends State<Receive1App> with TickerProviderStateMixin {
         color: !confirm1 ? Colors.grey[100] : Colors.red[300],
         child: ListTile(
           dense: true,
-          leading: Icon(Icons.fiber_manual_record, color: Colors.blue,),
+          leading: Icon(Icons.fiber_manual_record, color: confirm1 ? Colors.blue : Colors.grey,),
           trailing: Container(
             child: ButtonTheme(
               minWidth: 10.0,

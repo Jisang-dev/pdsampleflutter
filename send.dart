@@ -55,8 +55,8 @@ class Step {
     /// 킨텍스 : 37.667094, 126.743893
     // 역곡역 : 37.485470, 126.811923
     var R = 6371; // 지구의 반경(단위: km)
-    var dLat = deg2rad(x1 - 37.667094); // 역곡역 위도 (테스트용)
-    var dLng = deg2rad(y1 - 126.743893); // 역곡역 경도 (테스트용)
+    var dLat = deg2rad(x1 - 37.667094);
+    var dLng = deg2rad(y1 - 126.743893);
 
     var a = sin(dLat/2) * sin(dLat/2) + (cos(deg2rad(x1)) * cos(deg2rad(37.667094)) * sin(dLng/2) * sin(dLng/2));
     var b = 2 * R * atan2(sqrt(a), sqrt(1-a));
@@ -292,7 +292,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
     await fetchPost(prefs.getString("token"), (double.parse(latlng[0])*1000000).toInt(), (double.parse(latlng[1])*1000000).toInt()).then((post) async {
       if (post.ok) {
         print("success");
-        if (!confirm3 && Step.get_harversion_distance(double.parse(latlng[0]), double.parse(latlng[1])) < 0.1) {
+        if (!confirm3 && Step.get_harversion_distance(double.parse(latlng[0]), double.parse(latlng[1])) < 5) {
           setState(() {
             confirm1 = confirm2 = confirm3 = true;
           });
@@ -301,7 +301,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
           } on Exception catch (e) {
             print(e.toString());
           }
-        } else if (!confirm2 && Step.get_harversion_distance(double.parse(latlng[0]), double.parse(latlng[1])) < 0.5) {
+        } else if (!confirm2 && Step.get_harversion_distance(double.parse(latlng[0]), double.parse(latlng[1])) < 20) {
           setState(() {
             confirm1 = confirm2 = true;
           });
@@ -388,13 +388,13 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
           await fetchPost(prefs.getString("token"), (currentLocation.latitude*1000000).toInt(), (currentLocation.longitude*1000000).toInt()).then((post) {
             if (post.ok) {
               print("success");
-              if (!confirm3 && Step.get_harversion_distance(currentLocation.latitude, currentLocation.longitude) < 0.1) {
+              if (!confirm3 && Step.get_harversion_distance(currentLocation.latitude, currentLocation.longitude) < 5) {
                 setState(() {
                   confirm1 = confirm2 = confirm3 = true;
                 });
                 cycle = 5000;
                 _count = 0;
-              } else if (!confirm2 && Step.get_harversion_distance(currentLocation.latitude, currentLocation.longitude) < 0.5) {
+              } else if (!confirm2 && Step.get_harversion_distance(currentLocation.latitude, currentLocation.longitude) < 20) {
                 setState(() {
                   confirm1 = confirm2 = true;
                 });

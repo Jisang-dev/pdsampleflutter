@@ -256,19 +256,21 @@ class _MyHomePageState extends State<TempPage> {
 }
 
 class Maps extends StatefulWidget {
-  Maps({Key key, this.title}) : super(key: key);
+  Maps({Key key, this.title, this.terminal}) : super(key: key);
 
   final int title;
+  final String terminal;
 
   @override
-  _MapState createState() => new _MapState(title: this.title);
+  _MapState createState() => new _MapState(title: this.title, terminal: this.terminal);
 }
 
 class _MapState extends State<Maps> {
 
-  _MapState({this.title});
+  _MapState({this.title, this.terminal});
 
   final int title;
+  final String terminal;
 
   Map<int, dynamic> mapCode = {
     11: "https://ip2019.tk/static/images/park/innerT1.jpg",
@@ -283,6 +285,7 @@ class _MapState extends State<Maps> {
     303: "https://ip2019.tk/static/images/park/innerT1-3.jpg",
     304: "https://ip2019.tk/static/images/park/innerT1-4.jpg",
     305: "https://ip2019.tk/static/images/park/innerT1-5.jpg",
+    306: "https://ip2019.tk/static/images/park/innerT1-6.jpg",
 
     321: "https://ip2019.tk/static/images/park/innerT2.jpg",
 
@@ -293,43 +296,55 @@ class _MapState extends State<Maps> {
     363: "https://ip2019.tk/static/images/park/outer1-c.jpg",
     364: "https://ip2019.tk/static/images/park/outer1-d.jpg",
     365: "https://ip2019.tk/static/images/park/outer1-e.jpg",
-    366: "https://ip2019.tk/static/images/park/outer1-f.jpg",
-    367: "https://ip2019.tk/static/images/park/outer1-g.jpg",
-    368: "https://ip2019.tk/static/images/park/outer1-h.jpg",
-    369: "https://ip2019.tk/static/images/park/outer1-i.jpg",
-    370: "https://ip2019.tk/static/images/park/outer1-j.jpg",
 
-    401: "https://ip2019.tk/static/images/park/inner1-1a.jpg",
-    402: "https://ip2019.tk/static/images/park/inner1-1b.jpg",
-    403: "https://ip2019.tk/static/images/park/inner1-1c.jpg",
-    404: "https://ip2019.tk/static/images/park/inner1-2a.jpg",
-    405: "https://ip2019.tk/static/images/park/inner1-2b.jpg",
-    406: "https://ip2019.tk/static/images/park/inner1-3a.jpg",
-    407: "https://ip2019.tk/static/images/park/inner1-3b.jpg",
-    408: "https://ip2019.tk/static/images/park/inner1-4a.jpg",
-    409: "https://ip2019.tk/static/images/park/inner1-4b.jpg",
-    410: "https://ip2019.tk/static/images/park/inner1-4c.jpg",
-    411: "https://ip2019.tk/static/images/park/inner1-5a.jpg",
-    412: "https://ip2019.tk/static/images/park/inner1-5a.jpg",
-    413: "https://ip2019.tk/static/images/park/inner1-5b.jpg",
-    414: "https://ip2019.tk/static/images/park/inner1-5b.jpg",
-    414: "https://ip2019.tk/static/images/park/inner1-5c.jpg",
+    401: "https://ip2019.tk/static/images/park/inner1-1.jpg",
+    402: "https://ip2019.tk/static/images/park/inner1-2.jpg",
+    403: "https://ip2019.tk/static/images/park/inner1-3.jpg",
+    404: "https://ip2019.tk/static/images/park/inner1-4.jpg",
+    405: "https://ip2019.tk/static/images/park/inner1-5.jpg",
 
     901: "https://ip2019.tk/static/images/park/innerT1.jpg",
     902: "https://ip2019.tk/static/images/park/innerT2.jpg",
+    903: "https://ip2019.tk/static/images/park/innerT2-a.jpg",
+  };
+
+  Map<int, String> mapCode2 = {
+    11: "",
+    12: "",
+    21: "",
+    22: "",
+    31: "",
+    41: "",
+
+    301: "1-",
+    302: "2-",
+    303: "3-",
+    304: "4-",
+    305: "5-",
+    306: "6-",
+
+    321: "",
+
+    341: "",
+
+    361: "A-",
+    362: "B-",
+    363: "C-",
+    364: "D-",
+    365: "E-",
+
+    401: "1-",
+    402: "2-",
+    403: "3-",
+    404: "4-",
+    405: "5-",
+
+    901: "대기 ",
+    902: "대기 ",
+    903: "대기 ",
   };
 
   PhotoViewController controller;
-  double preScale;
-  double preX = 0;
-  double preY = 0;
-
-  double x = 160.0 - 115;
-  double y = 320.0 + 60;
-
-  Offset temp = new Offset(115, -60);
-
-  List<Offset> places = new List<Offset>();
 
   @override
   void initState() {
@@ -345,16 +360,7 @@ class _MapState extends State<Maps> {
   }
 
   void listener(PhotoViewControllerValue value){
-    if (preScale == null) {
-      preScale = value.scale;
-    }
-    setState(() {
-      x += value.position.dx - preX - (value.scale - preScale) * temp.dx * 7;
-      y -= value.position.dy - preY + (value.scale - preScale) * temp.dy * 7;
-    });
-    preScale = value.scale;
-    preX = value.position.dx;
-    preY = value.position.dy;
+
   }
 
   @override
@@ -371,39 +377,15 @@ class _MapState extends State<Maps> {
             icon: new Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: Text('상세 지도 확인', style: TextStyle(fontWeight: FontWeight.bold,),),
+          title: Text('주차위치: ' + terminal, style: TextStyle(fontWeight: FontWeight.bold,),),
         ),
-        body: Container(
-          alignment: Alignment.center,
-          child: Stack(
-            children: <Widget>[
-              Positioned(
-                child: PhotoView(
-                  controller: controller,
-                  imageProvider: NetworkImage(mapCode[title]),
-                  minScale: 0.1,
-                  maxScale: 4.0,
-                  backgroundDecoration: BoxDecoration(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-//              Positioned(
-//                left: x,
-//                bottom: y,
-//                child: Column(
-//                  mainAxisAlignment: MainAxisAlignment.center,
-//                  crossAxisAlignment: CrossAxisAlignment.center,
-//                  children: <Widget>[
-//                    Text("1전시관 20", textAlign: TextAlign.center,),
-//                    Image.asset(
-//                      'assets/place.png',
-//                    ),
-//                  ],
-//                ),
-//              ),
-            ],
-          ),
+        body: PhotoView(
+          imageProvider: NetworkImage(mapCode[title]),
+          controller: controller,
+          minScale: PhotoViewComputedScale.contained * 0.8,
+          maxScale: PhotoViewComputedScale.covered * 1.8,
+          initialScale: PhotoViewComputedScale.contained,
+          basePosition: Alignment.center,
         ),
       ),
     );

@@ -74,6 +74,44 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
 
   Widget circle = Center(child: CircularProgressIndicator());
 
+  Map<int, String> mapCode = {
+    11: "",
+    12: "",
+    21: "",
+    22: "",
+    31: "",
+    41: "",
+
+    301: "1-",
+    302: "2-",
+    303: "3-",
+    304: "4-",
+    305: "5-",
+    306: "6-",
+
+    321: "",
+
+    341: "",
+
+    361: "A-",
+    362: "B-",
+    363: "C-",
+    364: "D-",
+    365: "E-",
+
+    401: "1-",
+    402: "2-",
+    403: "3-",
+    404: "4-",
+    405: "5-",
+
+    901: "대기 ",
+    902: "대기 ",
+    903: "대기 ",
+  };
+
+  String terminal = "";
+
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
@@ -93,6 +131,8 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
           summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 11 ? "'1' 구역" :
           summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 21 ? "'2' 구역" :
           summary['bus_target_code'][0] == 41 && summary['bus_target_code'][1] == 41 ? "해외/국내 대표단" : "중국어 대회";
+
+          terminal = summary['bus_return'][dataInt[_commitDate]] + " " + mapCode[summary['bus_return_code'][dataInt[_commitDate]]] + "" + (summary['bus_return_slot'][dataInt[_commitDate]] != null ? (summary['bus_return_slot'][dataInt[_commitDate]] + 1).toString() : "");
         });
       }
     });
@@ -101,6 +141,14 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
         setState(() {
           info = data['bus_info'];
         });
+
+        if (info['bus_driver_phone'] == null || info['bus_number'] == null || info['bus_driver_phone'].toString().length < 4 || info['bus_number'].toString().length < 7) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => EditBus(this)),
+          );
+        }
+
         // 터미널 도착할 경우
         if (info['bus_step'] == Step.RETURN_END || info['bus_step'] == Step.RETURN_RIDE) {
           confirm1 = confirm2 = confirm3 = confirm4 = confirm5 = true;
@@ -308,14 +356,15 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
               child: GestureDetector(
                 onTap: () async {
                   String url =
-                  summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/open?id=17PGJjwb9qQ-if7FvL_ZsrHpeSO8nOn-L" :
-                  summary['bus_target_code'][0] == 22 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/open?id=12xa0copHjNNmCa_x1ncBDMujFd4QxLM0" :
-                  summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/open?id=1jur9t1AlcRkdlEIN38JFU30-YmeL2XOC" :
-                  summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 22 ? "https://drive.google.com/open?id=1F1-LhjS3QqVWxEjzT89SIVB5O95gG-xo" :
-                  summary['bus_target_code'][0] == 12 && summary['bus_target_code'][1] == 12 ? "https://drive.google.com/open?id=120PXgkzdUpFRsgacsu4zSq_YdPozHmYB" :
-                  summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/open?id=1Ikv4bp79ipY35dRa5ufQPVccJDhMGy34" :
-                  summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/open?id=1ID7pjflNW_zKS0Nwmo6CGziHkLqLf9ju" :
-                  summary['bus_target_code'][0] == 41 && summary['bus_target_code'][1] == 41 ? "https://drive.google.com/open?id=1P3ysjLbv9M9WC7bCCDGYxyceIlO1nDv9" : "https://drive.google.com/open?id=10K9VmxV5ot-ByOq_VDyI_57sElU-ZH9w";
+                  summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/file/d/17PGJjwb9qQ-if7FvL_ZsrHpeSO8nOn-L/view" :
+                  summary['bus_target_code'][0] == 22 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/file/d/12xa0copHjNNmCa_x1ncBDMujFd4QxLM0/view" :
+                  summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/file/d/1jur9t1AlcRkdlEIN38JFU30-YmeL2XOC/view" :
+                  summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 22 ? "https://drive.google.com/file/d/1F1-LhjS3QqVWxEjzT89SIVB5O95gG-xo/view" :
+                  summary['bus_target_code'][0] == 12 && summary['bus_target_code'][1] == 12 ? "https://drive.google.com/file/d/120PXgkzdUpFRsgacsu4zSq_YdPozHmYB/view" :
+                  summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/file/d/1Ikv4bp79ipY35dRa5ufQPVccJDhMGy34/view" :
+                  summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/file/d/1ID7pjflNW_zKS0Nwmo6CGziHkLqLf9ju/view" :
+                  summary['bus_target_code'][0] == 31 && summary['bus_target_code'][1] == 31 ? "https://drive.google.com/file/d/1iNZpN9-nE8wkDe8HOCcUpfBb_ILeGjOR/view" :
+                  summary['bus_target_code'][0] == 41 && summary['bus_target_code'][1] == 41 ? "https://drive.google.com/file/d/1P3ysjLbv9M9WC7bCCDGYxyceIlO1nDv9/view" : "https://drive.google.com/file/d/1Ikv4bp79ipY35dRa5ufQPVccJDhMGy34/view";
                   if (Platform.isAndroid) {
                     if (await canLaunch(url)) {
                       await launch(
@@ -341,8 +390,44 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                 child: Text("PDF 파일 (클릭 시 사이트로 이동)", style: TextStyle(color: Colors.blue,),),
               ),
             ),
+            Platform.isAndroid ? Container(
+              color: Colors.grey[100],
+              padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+              child: GestureDetector(
+                onTap: () async {
+                  String url =
+                  summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/uc?authuser=0&id=17PGJjwb9qQ-if7FvL_ZsrHpeSO8nOn-L&export=download" :
+                  summary['bus_target_code'][0] == 22 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/uc?authuser=0&id=12xa0copHjNNmCa_x1ncBDMujFd4QxLM0&export=download" :
+                  summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/uc?authuser=0&id=1jur9t1AlcRkdlEIN38JFU30-YmeL2XOC&export=download" :
+                  summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 22 ? "https://drive.google.com/uc?authuser=0&id=1F1-LhjS3QqVWxEjzT89SIVB5O95gG-xo&export=download" :
+                  summary['bus_target_code'][0] == 12 && summary['bus_target_code'][1] == 12 ? "https://drive.google.com/uc?authuser=0&id=120PXgkzdUpFRsgacsu4zSq_YdPozHmYB&export=download" :
+                  summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/uc?authuser=0&id=1Ikv4bp79ipY35dRa5ufQPVccJDhMGy34&export=download" :
+                  summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/uc?authuser=0&id=1ID7pjflNW_zKS0Nwmo6CGziHkLqLf9ju&export=download" :
+                  summary['bus_target_code'][0] == 31 && summary['bus_target_code'][1] == 31 ? "https://drive.google.com/uc?authuser=0&id=1iNZpN9-nE8wkDe8HOCcUpfBb_ILeGjOR&export=download" :
+                  summary['bus_target_code'][0] == 41 && summary['bus_target_code'][1] == 41 ? "https://drive.google.com/uc?authuser=0&id=1P3ysjLbv9M9WC7bCCDGYxyceIlO1nDv9&export=download" : "https://drive.google.com/uc?authuser=0&id=1Ikv4bp79ipY35dRa5ufQPVccJDhMGy34&export=download";
+                  if (Platform.isAndroid) {
+                    if (await canLaunch(url)) {
+                      await launch(
+                        url,
+                        enableJavaScript: true,
+                      );
+                    }
+                  } else {
+                    try {
+                      await launch(
+                        url,
+                        enableJavaScript: true,
+                      );
+                    } catch (e) {
+                      print(e.toString());
+                    }
+                  }
+                },
+                child: Text("PDF 파일 (클릭 시 기기 다운로드)", style: TextStyle(color: Colors.blue,),),
+              ),
+            ) : Container(),
             Container(
-              padding: EdgeInsets.fromLTRB(50, 100, 50, 0),
+              padding: EdgeInsets.fromLTRB(50, 50, 50, 0),
               child: RaisedButton(
                 color: Colors.green[900],
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -495,7 +580,7 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
                   child: Text("터미널(주차장) 정보", style: TextStyle(fontSize: 14.0,),),
                 ),
                 Expanded(
-                  child: Text(summary['bus_return'][dataInt[_commitDate] ?? "오류"], style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.pink),),
+                  child: Text(terminal, style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold, color: Colors.pink),),
                 ),
                 Container(
                   alignment: Alignment.centerRight,
@@ -692,7 +777,7 @@ class _MyAppState extends State<ReceiveApp> with TickerProviderStateMixin {
   void _map() async {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => Maps(title: summary["bus_return_code"][dataInt[_commitDate]] ?? 0,)), /// 터미널에 따라 지도 모양 다르게
+      MaterialPageRoute(builder: (context) => Maps(title: summary["bus_return_code"][dataInt[_commitDate]] ?? 0, terminal: terminal,)), /// 터미널에 따라 지도 모양 다르게
     );
   }
 

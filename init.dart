@@ -254,14 +254,15 @@ class _MyAppState extends State<InitPage> {
                 child: GestureDetector(
                   onTap: () async {
                     String url =
-                    summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/open?id=17PGJjwb9qQ-if7FvL_ZsrHpeSO8nOn-L" :
-                    summary['bus_target_code'][0] == 22 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/open?id=12xa0copHjNNmCa_x1ncBDMujFd4QxLM0" :
-                    summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/open?id=1jur9t1AlcRkdlEIN38JFU30-YmeL2XOC" :
-                    summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 22 ? "https://drive.google.com/open?id=1F1-LhjS3QqVWxEjzT89SIVB5O95gG-xo" :
-                    summary['bus_target_code'][0] == 12 && summary['bus_target_code'][1] == 12 ? "https://drive.google.com/open?id=120PXgkzdUpFRsgacsu4zSq_YdPozHmYB" :
-                    summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/open?id=1Ikv4bp79ipY35dRa5ufQPVccJDhMGy34" :
-                    summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/open?id=1ID7pjflNW_zKS0Nwmo6CGziHkLqLf9ju" :
-                    summary['bus_target_code'][0] == 41 && summary['bus_target_code'][1] == 41 ? "https://drive.google.com/open?id=1P3ysjLbv9M9WC7bCCDGYxyceIlO1nDv9" : "https://drive.google.com/open?id=10K9VmxV5ot-ByOq_VDyI_57sElU-ZH9w";
+                    summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/file/d/17PGJjwb9qQ-if7FvL_ZsrHpeSO8nOn-L/view" :
+                    summary['bus_target_code'][0] == 22 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/file/d/12xa0copHjNNmCa_x1ncBDMujFd4QxLM0/view" :
+                    summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/file/d/1jur9t1AlcRkdlEIN38JFU30-YmeL2XOC/view" :
+                    summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 22 ? "https://drive.google.com/file/d/1F1-LhjS3QqVWxEjzT89SIVB5O95gG-xo/view" :
+                    summary['bus_target_code'][0] == 12 && summary['bus_target_code'][1] == 12 ? "https://drive.google.com/file/d/120PXgkzdUpFRsgacsu4zSq_YdPozHmYB/view" :
+                    summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/file/d/1Ikv4bp79ipY35dRa5ufQPVccJDhMGy34/view" :
+                    summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/file/d/1ID7pjflNW_zKS0Nwmo6CGziHkLqLf9ju/view" :
+                    summary['bus_target_code'][0] == 31 && summary['bus_target_code'][1] == 31 ? "https://drive.google.com/file/d/1iNZpN9-nE8wkDe8HOCcUpfBb_ILeGjOR/view" :
+                    summary['bus_target_code'][0] == 41 && summary['bus_target_code'][1] == 41 ? "https://drive.google.com/file/d/1P3ysjLbv9M9WC7bCCDGYxyceIlO1nDv9/view" : "https://drive.google.com/file/d/1Ikv4bp79ipY35dRa5ufQPVccJDhMGy34/view";
                     if (Platform.isAndroid) {
                       if (await canLaunch(url)) {
                         await launch(
@@ -287,8 +288,44 @@ class _MyAppState extends State<InitPage> {
                   child: Text("PDF 파일 (클릭 시 사이트로 이동)", style: TextStyle(color: Colors.blue,),),
                 ),
               ),
+              Platform.isAndroid ? Container(
+                color: Colors.grey[100],
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 20),
+                child: GestureDetector(
+                  onTap: () async {
+                    String url =
+                    summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/uc?authuser=0&id=17PGJjwb9qQ-if7FvL_ZsrHpeSO8nOn-L&export=download" :
+                    summary['bus_target_code'][0] == 22 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/uc?authuser=0&id=12xa0copHjNNmCa_x1ncBDMujFd4QxLM0&export=download" :
+                    summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/uc?authuser=0&id=1jur9t1AlcRkdlEIN38JFU30-YmeL2XOC&export=download" :
+                    summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 22 ? "https://drive.google.com/uc?authuser=0&id=1F1-LhjS3QqVWxEjzT89SIVB5O95gG-xo&export=download" :
+                    summary['bus_target_code'][0] == 12 && summary['bus_target_code'][1] == 12 ? "https://drive.google.com/uc?authuser=0&id=120PXgkzdUpFRsgacsu4zSq_YdPozHmYB&export=download" :
+                    summary['bus_target_code'][0] == 11 && summary['bus_target_code'][1] == 11 ? "https://drive.google.com/uc?authuser=0&id=1Ikv4bp79ipY35dRa5ufQPVccJDhMGy34&export=download" :
+                    summary['bus_target_code'][0] == 21 && summary['bus_target_code'][1] == 21 ? "https://drive.google.com/uc?authuser=0&id=1ID7pjflNW_zKS0Nwmo6CGziHkLqLf9ju&export=download" :
+                    summary['bus_target_code'][0] == 31 && summary['bus_target_code'][1] == 31 ? "https://drive.google.com/uc?authuser=0&id=1iNZpN9-nE8wkDe8HOCcUpfBb_ILeGjOR&export=download" :
+                    summary['bus_target_code'][0] == 41 && summary['bus_target_code'][1] == 41 ? "https://drive.google.com/uc?authuser=0&id=1P3ysjLbv9M9WC7bCCDGYxyceIlO1nDv9&export=download" : "https://drive.google.com/uc?authuser=0&id=1Ikv4bp79ipY35dRa5ufQPVccJDhMGy34&export=download";
+                    if (Platform.isAndroid) {
+                      if (await canLaunch(url)) {
+                        await launch(
+                          url,
+                          enableJavaScript: true,
+                        );
+                      }
+                    } else {
+                      try {
+                        await launch(
+                          url,
+                          enableJavaScript: true,
+                        );
+                      } catch (e) {
+                        print(e.toString());
+                      }
+                    }
+                  },
+                  child: Text("PDF 파일 (클릭 시 기기 다운로드)", style: TextStyle(color: Colors.blue,),),
+                ),
+              ) : Container(),
               Container(
-                padding: EdgeInsets.fromLTRB(50, 100, 50, 0),
+                padding: EdgeInsets.fromLTRB(50, 50, 50, 0),
                 child: RaisedButton(
                   color: Colors.green[900],
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -594,7 +631,7 @@ class _MyAppState extends State<InitPage> {
       await fetchPost(prefs.getString('token'), _guideName, _guideNumber, _busCode, _busNumber, _timeline == Timeline.morning ? (info['bus_step'] > Step.DEPARTURE_START && info['bus_step'] <= Step.DEPARTURE_END ? "default" : "dReady") : (info['bus_step'] > Step.RETURN_REQUEST && info['bus_step'] <= Step.RETURN_END ? "default" : "request")).then((post) async {
         if (post.ok) {
           if (_timeline == Timeline.morning) {
-            if (type == null || type == "" || type == "해외/국내 대표단" || type == "중국어 대회") {
+            if (type == null || type == "" || type == "해외/국내 대표단" || type == "중국어 대회" || (type == "일" && dataInt[_commitDate] == 2)) {
               Navigator.pushReplacement(
                 context,
                 new MaterialPageRoute(
@@ -610,7 +647,8 @@ class _MyAppState extends State<InitPage> {
               );
             }
           } else {
-            if (type == null || type == "" || type == "해외/국내 대표단" || type == "중국어 대회") {
+            if (type == null || type == "" || type == "해외/국내 대표단" || type == "중국어 대회"
+            || type == "일") { /// 버스 정보 입력 꼭 필요함!!! 입력 안 되었을 시 다음 단계로 진행을 못하게 할 필요 있을 듯
               Navigator.pushReplacement(
                 context,
                 new MaterialPageRoute(

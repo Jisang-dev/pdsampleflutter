@@ -141,6 +141,13 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
           info = data['bus_info'];
         });
 
+        if (info['bus_guide_name'] == null || info['bus_guide_phone'] == null || info['bus_guide_phone'].toString().length < 7) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => EditProfile(this)),
+          );
+        }
+
         if (info['bus_step'] == Step.DEPARTURE_END) {
           setState(() {
             confirm1 = confirm2 = confirm3 = confirm4 = confirm5 = true;
@@ -845,7 +852,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
         title: Text("출발", style: TextStyle(fontSize: 20),),
         subtitle: Text("버스가 출발하였을 때 누릅니다. \nGPS가 켜져있는지도 확인해주세요.",),
         onTap: () {
-          !confirm1 ? alert("버스가 출발하였습니까?", 1) : alert("버스가 출발하지 않았습니까?", 6);
+          !confirm1 ? alert("버스가 출발하였습니까?", 1) : alert("버스가 출발한 것으로 입력되어 있습니다. 아직 출발하지 않았다면 '네'를 눌러주세요.", 6);
         },
       ),
     ),
@@ -863,7 +870,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
         title: Text("터미널 도착", style: TextStyle(fontSize: 20),),
         subtitle: Text("터미널에 도착하였을 때 누릅니다.",),
         onTap: () {
-          !confirm4 ? alert("버스가 터미널에 정차하였습니까?", 4) : alert("버스가 아직 터미널에 정차하지 않았습니까?", 9);
+          !confirm4 ? alert("버스가 터미널에 정차하였습니까?", 4) : alert("버스가 터미널에 정차한 것으로 입력되어 있습니다. 아직 터미널에 정차하지 않았다면 '네'를 눌러주세요.", 9);
         },
       ),
     ),);
@@ -880,7 +887,7 @@ class _MyAppState extends State<SendApp> with TickerProviderStateMixin {
         title: Text("앱종료", style: TextStyle(fontSize: 20),),
         subtitle: Text("모두 하차하고, 버스가 터미널을 떠날 때 누릅니다.",),
         onTap: () {
-          !confirm5 ? alert("버스 승객이 모두 하차하였고, 버스가 터미널을 빠져나왔습니까?", 5) : alert("버스가 아직 터미널을 출발하지 않았습니까?", 10);
+          !confirm5 ? alert("버스 승객이 모두 하차하였고, 버스가 터미널을 빠져나왔습니까?", 5) : alert("버스가 터미널을 출발한 것으로 입력되어 있습니다. 아직 터미널을 출발하지 않았다면 '네'를 눌러주세요.", 10);
         },
       ),
     ),);
@@ -1404,7 +1411,7 @@ class Edit extends State<EditProfile> {
         keyboardType: TextInputType.phone,
         autofocus: true,
         decoration: new InputDecoration(
-          labelText: '인솔자 전화번호',
+          labelText: '인솔자 전화번호 (유효한 값 입력)',
         ),
         validator: (value) => value.isEmpty ? '값을 입력하세요.' : null,
         onSaved: (value) => _guideNumber = value,
@@ -1482,7 +1489,7 @@ class Edit extends State<EditProfile> {
         "bus_guide_phone": _guideNumber,
         "bus_number": _busCode,
         "bus_driver_phone": _busNumber,
-        "bus_day": 0, /// 매일 바뀌어야 함
+        "bus_day": dataInt[_commitDate], /// 매일 바뀌어야 함
       }),
       headers: {
         "content-type" : "application/json",
@@ -1723,7 +1730,7 @@ class EditB extends State<EditBus> {
         keyboardType: TextInputType.phone,
         autofocus: false,
         decoration: new InputDecoration(
-          labelText: '기사 연락처',
+          labelText: '기사 연락처 (유효한 값 입력)',
         ),
         validator: (value) => value.isEmpty ? '값을 입력하세요.' : null,
         onSaved: (value) => _busNumber = value,
@@ -1767,7 +1774,7 @@ class EditB extends State<EditBus> {
         "bus_guide_phone": _guideNumber,
         "bus_number": _busCode,
         "bus_driver_phone": _busNumber,
-        "bus_day": 0, /// 매일 바뀌어야 함
+        "bus_day": dataInt[_commitDate], /// 매일 바뀌어야 함
       }),
       headers: {
         "content-type" : "application/json",
